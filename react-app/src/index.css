@@ -1,0 +1,9 @@
+/* Default styles cleared */
+
+/* Custom Grid for 7 items per row */
+@media (min-width: 992px) {
+    .row-cols-lg-7>* {
+        flex: 0 0 auto;
+        width: 14.2857142857%;
+    }
+}

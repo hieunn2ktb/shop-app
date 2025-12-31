@@ -1,0 +1,31 @@
+/*
+Custom Css
+*/
+
+/* Carousel Custom Indicators */
+.carousel-indicators.custom-indicators {
+    bottom: -40px;
+}
+
+.carousel-indicators.custom-indicators button {
+    width: 12px !important;
+    height: 12px !important;
+    border-radius: 50% !important;
+    margin: 0 5px !important;
+    border: 1px solid #ff9999 !important;
+    background-color: transparent !important;
+    opacity: 1 !important;
+}
+
+.carousel-indicators.custom-indicators button.active {
+    background-color: #ff9999 !important;
+}
+
+/* Header Navigation Custom Styles */
+.app-nav-link {
+    transition: color 0.3s ease;
+}
+
+.app-nav-link:hover {
+    color: #ff3366 !important;
+}
