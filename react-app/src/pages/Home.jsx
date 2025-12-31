@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { getCategories, getBrands, getFlashSaleProducts, getProductSections } from '../services/homeService';
 import banner1 from '../assets/img/banner_img_01.jpg';
 import banner2 from '../assets/img/banner_img_02.jpg';
 import banner3 from '../assets/img/banner_img_03.jpg';
@@ -14,7 +15,44 @@ import brand2 from '../assets/img/brand_02.png';
 import brand3 from '../assets/img/brand_03.png';
 import brand4 from '../assets/img/brand_04.png';
 
+// Helper to resolve image (using placeholder if null/empty for now)
+const resolveImage = (imgName) => {
+    if (!imgName) return feat1;
+    // Logic to handle real URLs vs local assets would go here
+    return feat1; // Fallback for now since DB images might be just filenames
+};
+
 const Home = () => {
+    const [categories, setCategories] = useState([]);
+    const [brands, setBrands] = useState([]);
+    const [flashSale, setFlashSale] = useState([]);
+    const [sections, setSections] = useState({
+        makeup: [],
+        faceCare: [],
+        sets: [],
+        sunCare: [],
+        cleansing: []
+    });
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const cats = await getCategories();
+            if (cats.length > 0) setCategories(cats);
+
+            const brs = await getBrands();
+            if (brs.length > 0) setBrands(brs);
+
+            const fs = await getFlashSaleProducts();
+            if (fs.length > 0) setFlashSale(fs);
+
+            const secs = await getProductSections();
+            // Merge with existing structure if needed, or just set
+            setSections(prev => ({ ...prev, ...secs }));
+        };
+        fetchData();
+    }, []);
+
+    // ... render ... 
     return (
         <main>
             {/* 1. Hero Slider */}
@@ -65,28 +103,21 @@ const Home = () => {
                             </div>
                         </div>
                         <div className="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-7 g-3 text-center">
-                            {[
-                                { name: "Son Môi", img: cat1 },
-                                { name: "Tẩy Da Chết", img: cat2 },
-                                { name: "Tẩy Trang", img: cat3 },
-                                { name: "Mặt Nạ", img: cat1 },
-                                { name: "Kem Dưỡng", img: cat2 },
-                                { name: "Kem Dưỡng Mắt", img: cat3 },
-                                { name: "Phấn Phủ", img: cat1 },
-                                { name: "Sữa Rửa Mặt", img: cat2 },
-                                { name: "Kem Chống Nắng", img: cat3 },
-                                { name: "Cushion", img: cat1 },
-                                { name: "Thực Phẩm Chức Năng", img: cat2 },
-                                { name: "Tinh Chất", img: cat3 },
-                                { name: "Kem Lót/Nền", img: cat1 },
-                                { name: "Chăm Sóc Cơ Thể", img: cat2 }
-                            ].map((cat, index) => (
+                            {(categories.length > 0 ? categories : [
+                                { name: "Son Môi", image: null },
+                                { name: "Tẩy Da Chết", image: null },
+                                { name: "Tẩy Trang", image: null },
+                                { name: "Mặt Nạ", image: null },
+                                { name: "Kem Dưỡng", image: null },
+                                { name: "Kem Dưỡng Mắt", image: null },
+                                { name: "Phấn Phủ", image: null },
+                            ]).map((cat, index) => (
                                 <div key={index} className="col">
                                     <div className="category-item p-2 h-100">
                                         <Link to="/shop" className="text-decoration-none text-dark">
                                             <div className="mb-2">
                                                 <img
-                                                    src={cat.img}
+                                                    src={resolveImage(cat.image)}
                                                     className="img-fluid rounded-circle border"
                                                     alt={cat.name}
                                                     style={{ width: '80px', height: '80px', objectFit: 'cover' }}
@@ -137,39 +168,39 @@ const Home = () => {
 
                         {/* Product List */}
                         <div className="row row-cols-2 row-cols-md-5 g-3">
-                            {/* Sample Product Items */}
-                            {[
-                                { name: "Bộ Dưỡng Trẻ Hóa Da Hoàn Lưu Cao Whoo Hwanyu Go...", brand: "WHOO", price: "690.000đ", oldPrice: "1.500.000đ", discount: "-54%", img: feat1, sold: 16 },
-                                { name: "Bộ Kem Dưỡng Trắng Da Ohui Extreme White...", brand: "OHUI", price: "1.390.000đ", oldPrice: "2.250.000đ", discount: "-38%", img: feat2, sold: 11 },
-                                { name: "Bộ Son Dưỡng The Whoo Essential Lip Glow...", brand: "WHOO", price: "600.000đ", oldPrice: "980.000đ", discount: "-28%", img: feat3, sold: 15 },
-                                { name: "Kem Dưỡng Cấp Ẩm Whoo Hồng Gongjinhyang...", brand: "KHÁC", price: "590.000đ", oldPrice: "1.500.000đ", discount: "-61%", img: feat1, sold: 99 },
-                                { name: "Nước Hoa Hồng Tái Sinh Da Ohui The First...", brand: "OHUI", price: "990.000đ", oldPrice: "2.250.000đ", discount: "-56%", img: feat2, sold: 13 },
-                            ].map((item, index) => (
+                            {/* Product Items */}
+                            {(flashSale.length > 0 ? flashSale : [
+                                // Fallback dummy data if API returns empty (optional, for demo)
+                                { name: "Demo Product 1", brand: "DEMO", price: 100000, originalPrice: 200000, quantity: 10, images: [] },
+                                { name: "Demo Product 2", brand: "DEMO", price: 200000, originalPrice: 300000, quantity: 5, images: [] }
+                            ]).map((item, index) => (
                                 <div key={index} className="col">
                                     <div className="card h-100 border-0 shadow-sm position-relative">
                                         {/* Discount Badge */}
-                                        <span className="position-absolute top-0 start-0 badge bg-danger m-2">
-                                            {item.discount}
-                                        </span>
+                                        {item.originalPrice > item.price && (
+                                            <span className="position-absolute top-0 start-0 badge bg-danger m-2">
+                                                -{Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100)}%
+                                            </span>
+                                        )}
                                         {/* Wishlist Icon */}
                                         <button className="btn btn-sm position-absolute top-0 end-0 m-1 text-muted">
                                             <i className="far fa-heart"></i>
                                         </button>
 
                                         <Link to="/shop-single">
-                                            <img src={item.img} className="card-img-top p-3" alt={item.name} />
+                                            <img src={resolveImage(item.images?.[0]?.imageUrl)} className="card-img-top p-3" alt={item.name} />
                                         </Link>
 
                                         <div className="card-body p-2 d-flex flex-column">
-                                            <small className="text-uppercase text-muted" style={{ fontSize: '0.75rem' }}>{item.brand}</small>
+                                            <small className="text-uppercase text-muted" style={{ fontSize: '0.75rem' }}>{item.brand?.name || "Linh Cosmetics"}</small>
                                             <Link to="/shop-single" className="text-decoration-none text-dark mb-2">
                                                 <h6 className="card-title text-truncate" style={{ fontSize: '0.9rem' }}>{item.name}</h6>
                                             </Link>
 
                                             <div className="mt-auto">
                                                 <div className="d-flex align-items-baseline mb-1">
-                                                    <span className="text-danger fw-bold me-2">{item.price}</span>
-                                                    <small className="text-muted text-decoration-line-through" style={{ fontSize: '0.8rem' }}>{item.oldPrice}</small>
+                                                    <span className="text-danger fw-bold me-2">{item.price?.toLocaleString()}đ</span>
+                                                    {item.originalPrice && <small className="text-muted text-decoration-line-through" style={{ fontSize: '0.8rem' }}>{item.originalPrice.toLocaleString()}đ</small>}
                                                 </div>
 
                                                 {/* Sold Progress Bar */}
@@ -177,13 +208,13 @@ const Home = () => {
                                                     <div
                                                         className="progress-bar bg-danger"
                                                         role="progressbar"
-                                                        style={{ width: `${Math.min(item.sold * 2, 100)}%` }}
-                                                        aria-valuenow={item.sold}
+                                                        style={{ width: '50%' }}
+                                                        aria-valuenow="50"
                                                         aria-valuemin="0"
                                                         aria-valuemax="100"
                                                     ></div>
                                                     <small className="position-absolute w-100 text-center text-white fw-bold" style={{ fontSize: '0.7rem', lineHeight: '18px' }}>
-                                                        {item.sold >= 90 ? 'Sắp cháy hàng' : `Đã bán ${item.sold} sản phẩm`}
+                                                        Đã bán {item.quantity ? 100 - item.quantity : 10} sản phẩm
                                                     </small>
                                                     <span className="position-absolute start-0 ms-1 text-white">🔥</span>
                                                 </div>
@@ -232,21 +263,12 @@ const Home = () => {
                             {/* Right Brand Grid */}
                             <div className="col-lg-8 col-md-7">
                                 <div className="row row-cols-2 row-cols-sm-3 row-cols-lg-5 g-2 h-100">
-                                    {[
-                                        { name: "OHUI", img: brand1 },
-                                        { name: "SUM:37", img: brand2 },
-                                        { name: "BEYOND", img: brand3 },
-                                        { name: "CARE ZONE", img: brand4 },
-                                        { name: "CODE", img: brand1 },
-                                        { name: "THE WHOO", img: brand2 },
-                                        { name: "GARDEN", img: brand3 },
-                                        { name: "CNP", img: brand4 },
-                                        { name: "BELIF", img: brand1 },
-                                        { name: "ESSANCE", img: brand2 },
-                                    ].map((brand, index) => (
+                                    {(brands.length > 0 ? brands : [
+                                        { name: "Brand 1", logo: null }, { name: "Brand 2", logo: null }, { name: "Brand 3", logo: null }
+                                    ]).map((brand, index) => (
                                         <div key={index} className="col">
                                             <div className="border rounded p-3 text-center h-100 d-flex align-items-center justify-content-center hover-shadow" style={{ minHeight: '130px' }}>
-                                                <img src={brand.img} className="img-fluid" style={{ maxHeight: '60px', filter: 'grayscale(100%)', opacity: '0.7', transition: 'all 0.3s' }}
+                                                <img src={resolveImage(brand.logo)} className="img-fluid" style={{ maxHeight: '60px', filter: 'grayscale(100%)', opacity: '0.7', transition: 'all 0.3s' }}
                                                     onMouseOver={(e) => { e.currentTarget.style.filter = 'none'; e.currentTarget.style.opacity = '1'; }}
                                                     onMouseOut={(e) => { e.currentTarget.style.filter = 'grayscale(100%)'; e.currentTarget.style.opacity = '0.7'; }}
                                                     alt={brand.name} />
