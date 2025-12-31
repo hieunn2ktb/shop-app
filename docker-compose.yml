@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # 1. MariaDB Database
+  database:
+    image: mariadb:10.11
+    container_name: shop-database
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cosmetic_shop
+    ports:
+      - "3307:3306" # Mapped to 3307 on host to avoid conflict with local MySQL/MariaDB
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - shop-network
+
+  # 2. RabbitMQ
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: shop-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672" # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+    networks:
+      - shop-network
+
+  # 3. Backend (Spring Boot)
+  backend:
+    build: ./cosmetic-shop
+    container_name: shop-backend
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:mariadb://database:3306/cosmetic_shop
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: user
+      RABBITMQ_PASSWORD: password
+    depends_on:
+      - database
+      - rabbitmq
+    networks:
+      - shop-network
+
+  # 4. Frontend (React)
+  frontend:
+    build: ./react-app
+    container_name: shop-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - shop-network
+
+volumes:
+  db_data:
+
+networks:
+  shop-network:
+    driver: bridge
