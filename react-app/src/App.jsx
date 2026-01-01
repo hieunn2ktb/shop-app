@@ -18,6 +18,9 @@ import ForgotPassword from './pages/ForgotPassword';
 import Contact from './pages/Contact';
 import Blog from './pages/Blog';
 import NotFound from './pages/NotFound';
+import AdminLayout from './layouts/AdminLayout';
+import ProductList from './pages/admin/ProductList';
+import ProductForm from './pages/admin/ProductForm';
 
 function App() {
   return (
@@ -41,6 +44,18 @@ function App() {
       </Route>
       <Route path="/login" element={<Login />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
+
+      {/* Admin Routes */}
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route index element={<div className="p-4"><h3>Dashboard (Coming Soon)</h3></div>} />
+        <Route path="dashboard" element={<div className="p-4"><h3>Dashboard (Coming Soon)</h3></div>} />
+        <Route path="products" element={<ProductList />} />
+        <Route path="products/new" element={<ProductForm />} />
+        <Route path="products/edit/:id" element={<ProductForm />} />
+        {/* Placeholder for other admin pages */}
+        <Route path="*" element={<div className="p-4">Page under construction</div>} />
+      </Route>
+
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

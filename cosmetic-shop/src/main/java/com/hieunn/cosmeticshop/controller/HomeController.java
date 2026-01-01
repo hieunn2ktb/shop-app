@@ -17,7 +17,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/home")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*") // Allow requests from React App
+@CrossOrigin(origins = "*")
 public class HomeController {
 
     private final HomeService homeService;

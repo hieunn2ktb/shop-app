@@ -1,11 +1,44 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { getCurrentUser, logout } from '../services/authService';
 
 // Import local logo (assuming it's available or use a placeholder similar to original)
 // Note: User didn't provide logo asset, so styling a text logo or using a placeholder.
 // The screenshot shows a graphical logo. For now, we will use a text or placeholder image but structure effectively.
 
 const Header = ({ onOpenCart }) => {
+    const navigate = useNavigate();
+    const [user, setUser] = useState(null);
+
+    const [cartCount, setCartCount] = useState(0);
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            const currentUser = getCurrentUser();
+            if (currentUser) {
+                setUser(currentUser);
+                // Fetch Cart Count
+                try {
+                    const { getCart } = await import('../services/cartService'); // Dynamic import to avoid circular dependency if any
+                    const cart = await getCart();
+                    if (cart && cart.items) {
+                        setCartCount(cart.items.length);
+                    }
+                } catch (error) {
+                    console.log("Error loading cart count", error);
+                }
+            }
+        };
+        fetchUserData();
+    }, []);
+
+    const handleLogout = () => {
+        logout();
+        setUser(null);
+        navigate('/');
+        window.location.reload();
+    };
+
     return (
         <header className="bg-white shadow-sm sticky-top">
             {/* Top Bar: Logo, Search, Hotline, User Icons */}
@@ -44,14 +77,37 @@ const Header = ({ onOpenCart }) => {
                         {/* Icons */}
                         <div className="d-flex gap-3 align-items-center">
                             <a href="#" className="text-dark position-relative"><i className="fas fa-map-marker-alt fa-lg"></i></a>
-                            <Link to="/login" className="text-dark position-relative"><i className="fas fa-user fa-lg"></i></Link>
+
+                            {/* Auth Section */}
+                            {user ? (
+                                <div className="dropdown">
+                                    <a href="#" className="text-dark d-flex align-items-center text-decoration-none dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i className="fas fa-user-circle fa-lg me-1 text-primary"></i>
+                                        <span className="d-none d-md-inline small fw-bold">{user.username}</span>
+                                    </a>
+                                    <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                        <li><Link className="dropdown-item" to="/account">Tài khoản của tôi</Link></li>
+                                        <li><Link className="dropdown-item" to="/account/orders">Đơn mua</Link></li>
+                                        {user.role === 'ROLE_ADMIN' && (
+                                            <li><Link className="dropdown-item text-primary" to="/admin/products">Trang Admin</Link></li>
+                                        )}
+                                        <li><hr className="dropdown-divider" /></li>
+                                        <li><button className="dropdown-item text-danger" onClick={handleLogout}>Đăng xuất</button></li>
+                                    </ul>
+                                </div>
+                            ) : (
+                                <Link to="/login" className="text-dark position-relative" title="Đăng nhập">
+                                    <i className="fas fa-user fa-lg"></i>
+                                </Link>
+                            )}
+
                             <a href="#" className="text-dark position-relative">
                                 <i className="fas fa-heart fa-lg"></i>
                                 <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style={{ fontSize: '0.6rem' }}>0</span>
                             </a>
-                            <button className="btn p-0 border-0 text-dark position-relative" onClick={onOpenCart}>
+                            <button className="btn p-0 border-0 text-dark position-relative" onClick={() => navigate('/cart')}>
                                 <i className="fas fa-shopping-cart fa-lg"></i>
-                                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style={{ fontSize: '0.6rem' }}>0</span>
+                                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style={{ fontSize: '0.6rem' }}>{cartCount}</span>
                             </button>
                         </div>
                     </div>

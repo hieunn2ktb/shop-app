@@ -21,12 +21,13 @@ public class Category {
     private String name;
 
     private String slug;
-    
+
     @Column(columnDefinition = "TEXT")
     private String description;
-    
+
     private String image;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
     private List<Product> products;
 }

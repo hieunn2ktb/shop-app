@@ -9,7 +9,7 @@ services:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: cosmetic_shop
     ports:
-      - "3307:3306" # Mapped to 3307 on host to avoid conflict with local MySQL/MariaDB
+      - "3366:3306" # Mapped to 3308 on host to avoid conflict
     volumes:
       - db_data:/var/lib/mysql
     networks:

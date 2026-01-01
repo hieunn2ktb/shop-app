@@ -1,28 +1,29 @@
 package com.hieunn.cosmeticshop.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Entity
-@Table(name = "brands")
+@Table(name = "cart_items")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Brand {
+public class CartItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String name;
+    @ManyToOne
+    @JoinColumn(name = "cart_id")
+    @JsonIgnore
+    private Cart cart;
 
-    private String logo;
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    private Product product;
 
-    @com.fasterxml.jackson.annotation.JsonIgnore
-    @OneToMany(mappedBy = "brand")
-    private List<Product> products;
+    private int quantity;
 }

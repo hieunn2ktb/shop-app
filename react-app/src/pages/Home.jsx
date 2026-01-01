@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getCategories, getBrands, getFlashSaleProducts, getProductSections } from '../services/homeService';
+import { addToCart } from '../services/cartService';
 import banner1 from '../assets/img/banner_img_01.jpg';
 import banner2 from '../assets/img/banner_img_02.jpg';
 import banner3 from '../assets/img/banner_img_03.jpg';
@@ -182,10 +183,26 @@ const Home = () => {
                                                 -{Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100)}%
                                             </span>
                                         )}
-                                        {/* Wishlist Icon */}
-                                        <button className="btn btn-sm position-absolute top-0 end-0 m-1 text-muted">
-                                            <i className="far fa-heart"></i>
-                                        </button>
+                                        {/* Wishlist and Cart Icons */}
+                                        <div className="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
+                                            <button className="btn btn-sm btn-outline-secondary bg-white rounded-circle p-1" style={{ width: '30px', height: '30px' }}>
+                                                <i className="far fa-heart"></i>
+                                            </button>
+                                            <button
+                                                className="btn btn-sm btn-outline-secondary bg-white rounded-circle p-1"
+                                                style={{ width: '30px', height: '30px' }}
+                                                onClick={async () => {
+                                                    try {
+                                                        await addToCart(item.id, 1);
+                                                        alert('Đã thêm vào giỏ hàng!');
+                                                    } catch (err) {
+                                                        alert(err.message);
+                                                    }
+                                                }}
+                                            >
+                                                <i className="fas fa-shopping-bag"></i>
+                                            </button>
+                                        </div>
 
                                         <Link to="/shop-single">
                                             <img src={resolveImage(item.images?.[0]?.imageUrl)} className="card-img-top p-3" alt={item.name} />

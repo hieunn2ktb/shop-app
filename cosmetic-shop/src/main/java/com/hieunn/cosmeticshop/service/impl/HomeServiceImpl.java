@@ -34,7 +34,6 @@ public class HomeServiceImpl implements HomeService {
 
     @Override
     public List<Product> getFlashSaleProducts() {
-        // Return products with discount
         return productRepository.findDiscountedProducts();
     }
 
@@ -46,12 +45,10 @@ public class HomeServiceImpl implements HomeService {
     @Override
     public Map<String, List<Product>> getHomeProductSections() {
         Map<String, List<Product>> sections = new HashMap<>();
-        // Hardcoded slugs matching the frontend requirements
         sections.put("makeup", productRepository.findByCategorySlug("trang-diem"));
         sections.put("faceCare", productRepository.findByCategorySlug("cham-soc-da-mat"));
         sections.put("sets", productRepository.findByCategorySlug("bo-san-pham"));
-        sections.put("sunCare", productRepository.findByCategorySlug("cham-soc-co-the")); // Mapping sun care to body or
-                                                                                          // creating a new one
+        sections.put("sunCare", productRepository.findByCategorySlug("cham-soc-co-the"));
         sections.put("cleansing", productRepository.findByCategorySlug("lam-sach-da"));
         return sections;
     }
