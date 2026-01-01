@@ -10,9 +10,13 @@ import com.hieunn.cosmeticshop.repository.CategoryRepository;
 import com.hieunn.cosmeticshop.repository.ProductImageRepository;
 import com.hieunn.cosmeticshop.repository.ProductRepository;
 import com.hieunn.cosmeticshop.service.AdminProductService;
+import com.hieunn.cosmeticshop.service.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +28,8 @@ public class AdminProductServiceImpl implements AdminProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final BrandRepository brandRepository;
-    private final ProductImageRepository productImageRepository; // We need to add this Repo
+    private final ProductImageRepository productImageRepository;
+    private final FileStorageService fileStorageService; // Inject FileStorageService
 
     @Override
     public List<Product> getAllProducts() {
@@ -39,7 +44,7 @@ public class AdminProductServiceImpl implements AdminProductService {
 
     @Override
     @Transactional
-    public Product createProduct(ProductDTO dto) {
+    public Product createProduct(ProductDTO dto, MultipartFile image) throws IOException { // Added exception
         Product product = new Product();
         mapDtoToEntity(dto, product);
 
@@ -49,15 +54,21 @@ public class AdminProductServiceImpl implements AdminProductService {
         Product savedProduct = productRepository.save(product);
 
         // Handle Image
-        if (dto.getImageUrl() != null && !dto.getImageUrl().isEmpty()) {
-            ProductImage image = new ProductImage();
-            image.setImageUrl(dto.getImageUrl());
-            image.setProduct(savedProduct);
-            // Save image via cascading or separate repo if needed.
-            // Since CascadeType.ALL is on Product.images, we could add to list,
-            // but setting the ManyToOne relationship and saving via repo is safer for now
-            // if not initializing list
-            productImageRepository.save(image);
+        if (image != null && !image.isEmpty()) {
+            String fileName = fileStorageService.storeFile(image);
+            ProductImage productImage = new ProductImage();
+            // Store relative path or full URL. Usually relative path /uploads/filename is
+            // good.
+            // But frontend expects full URL or path. Let's store /uploads/filename
+            productImage.setImageUrl("http://localhost/uploads/" + fileName);
+            productImage.setProduct(savedProduct);
+            productImageRepository.save(productImage);
+        } else if (dto.getImageUrl() != null && !dto.getImageUrl().isEmpty()) {
+            // Fallback to URL if provided textually (optional)
+            ProductImage productImage = new ProductImage();
+            productImage.setImageUrl(dto.getImageUrl());
+            productImage.setProduct(savedProduct);
+            productImageRepository.save(productImage);
         }
 
         return savedProduct;
@@ -65,10 +76,23 @@ public class AdminProductServiceImpl implements AdminProductService {
 
     @Override
     @Transactional
-    public Product updateProduct(Long id, ProductDTO dto) {
+    public Product updateProduct(Long id, ProductDTO dto, MultipartFile image) throws IOException {
         Product product = getProductById(id);
         mapDtoToEntity(dto, product);
-        return productRepository.save(product);
+
+        Product savedProduct = productRepository.save(product);
+
+        if (image != null && !image.isEmpty()) {
+            String fileName = fileStorageService.storeFile(image);
+            // Logic to replace existing main image or add new one?
+            // For simplicity, let's just add it.
+            ProductImage productImage = new ProductImage();
+            productImage.setImageUrl("http://localhost/uploads/" + fileName);
+            productImage.setProduct(savedProduct);
+            productImageRepository.save(productImage);
+        }
+
+        return savedProduct;
     }
 
     @Override

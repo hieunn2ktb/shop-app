@@ -36,7 +36,7 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
-    
+
     @ManyToOne
     @JoinColumn(name = "brand_id")
     private Brand brand;
@@ -44,9 +44,11 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<ProductImage> images;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToMany(mappedBy = "product")
     private List<OrderItem> orderItems;
-    
+
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToMany(mappedBy = "product")
     private List<Review> reviews;
 }

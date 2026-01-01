@@ -4,9 +4,12 @@ import com.hieunn.cosmeticshop.dto.ProductDTO;
 import com.hieunn.cosmeticshop.entity.Product;
 import com.hieunn.cosmeticshop.service.AdminProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -27,14 +30,19 @@ public class AdminProductController {
         return ResponseEntity.ok(adminProductService.getProductById(id));
     }
 
-    @PostMapping
-    public ResponseEntity<Product> createProduct(@RequestBody ProductDTO productDTO) {
-        return ResponseEntity.ok(adminProductService.createProduct(productDTO));
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Product> createProduct(
+            @ModelAttribute ProductDTO productDTO,
+            @RequestParam(value = "image", required = false) MultipartFile image) throws IOException {
+        return ResponseEntity.ok(adminProductService.createProduct(productDTO, image));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody ProductDTO productDTO) {
-        return ResponseEntity.ok(adminProductService.updateProduct(id, productDTO));
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Product> updateProduct(
+            @PathVariable Long id,
+            @ModelAttribute ProductDTO productDTO,
+            @RequestParam(value = "image", required = false) MultipartFile image) throws IOException {
+        return ResponseEntity.ok(adminProductService.updateProduct(id, productDTO, image));
     }
 
     @DeleteMapping("/{id}")

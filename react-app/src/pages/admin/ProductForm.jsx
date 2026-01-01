@@ -13,9 +13,10 @@ const ProductForm = () => {
         originalPrice: '',
         quantity: '',
         description: '',
-        category: '', // Should be API driven select in real app
-        brand: '', // Should be API driven select
-        imageUrl: ''
+        category: '', // Input ID for now
+        brand: '', // Input ID for now
+        imageUrl: '',
+        imageFile: null
     });
 
     useEffect(() => {
@@ -33,9 +34,10 @@ const ProductForm = () => {
                 originalPrice: data.originalPrice,
                 quantity: data.quantity,
                 description: data.description,
-                category: data.category?.id || '', // Simplify for now
+                category: data.category?.id || '',
                 brand: data.brand?.id || '',
-                imageUrl: data.images?.[0]?.imageUrl || ''
+                imageUrl: data.images?.[0]?.imageUrl || '',
+                imageFile: null
             });
         }
     };
@@ -48,16 +50,30 @@ const ProductForm = () => {
         }));
     };
 
+    const handleFileChange = (e) => {
+        setFormData(prev => ({
+            ...prev,
+            imageFile: e.target.files[0]
+        }));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const payload = {
-                ...formData,
-                price: parseFloat(formData.price),
-                originalPrice: parseFloat(formData.originalPrice),
-                quantity: parseInt(formData.quantity)
-                // Note: Category and Brand mapping needs BE logic
-            };
+            const payload = new FormData();
+            payload.append('name', formData.name);
+            payload.append('price', formData.price);
+            payload.append('originalPrice', formData.originalPrice);
+            payload.append('quantity', formData.quantity);
+            payload.append('description', formData.description);
+            payload.append('categoryId', formData.category);
+            payload.append('brandId', formData.brand);
+
+            if (formData.imageFile) {
+                payload.append('image', formData.imageFile);
+            } else {
+                payload.append('imageUrl', formData.imageUrl);
+            }
 
             if (isEditMode) {
                 await updateProduct(id, payload);
@@ -68,7 +84,8 @@ const ProductForm = () => {
             }
             navigate('/admin/products');
         } catch (error) {
-            alert("Có lỗi xảy ra, vui lòng thử lại.");
+            console.error(error);
+            alert("Có lỗi xảy ra, vui lòng thử lại: " + error.message);
         }
     };
 
@@ -111,8 +128,20 @@ const ProductForm = () => {
                     </div>
 
                     <div className="mb-3">
-                        <label className="form-label">Ảnh sản phẩm (URL)</label>
+                        <label className="form-label">Ảnh sản phẩm</label>
+                        <input type="file" className="form-control mb-2" onChange={handleFileChange} accept="image/*" />
+                        <label className="form-label text-muted small">Hoặc nhập URL ảnh:</label>
                         <input type="text" className="form-control" name="imageUrl" value={formData.imageUrl} onChange={handleChange} placeholder="https://..." />
+                        {(formData.imageFile || formData.imageUrl) && (
+                            <div className="mt-2">
+                                <span className="small text-muted">Preview: </span>
+                                {formData.imageFile ? (
+                                    <span className="text-success fw-bold">{formData.imageFile.name}</span>
+                                ) : (
+                                    <img src={formData.imageUrl} alt="Preview" style={{ height: '50px' }} />
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     <div className="mb-4">

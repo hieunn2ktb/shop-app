@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8080/api/admin';
+const API_BASE_URL = 'http://localhost:8080/api/admin'; // Use relative path for Nginx Proxy
 
 export const getProducts = async () => {
     try {
@@ -23,20 +23,28 @@ export const getProductById = async (id) => {
 };
 
 export const createProduct = async (productData) => {
+    const isFormData = productData instanceof FormData;
+    const headers = isFormData ? {} : { 'Content-Type': 'application/json' };
+    const body = isFormData ? productData : JSON.stringify(productData);
+
     const response = await fetch(`${API_BASE_URL}/products`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(productData)
+        headers: headers,
+        body: body
     });
     if (!response.ok) throw new Error('Failed to create product');
     return await response.json();
 };
 
 export const updateProduct = async (id, productData) => {
+    const isFormData = productData instanceof FormData;
+    const headers = isFormData ? {} : { 'Content-Type': 'application/json' };
+    const body = isFormData ? productData : JSON.stringify(productData);
+
     const response = await fetch(`${API_BASE_URL}/products/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(productData)
+        headers: headers,
+        body: body
     });
     if (!response.ok) throw new Error('Failed to update product');
     return await response.json();

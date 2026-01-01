@@ -48,14 +48,19 @@ services:
     networks:
       - shop-network
 
-  # 4. Frontend (React)
-  frontend:
-    build: ./react-app
-    container_name: shop-frontend
+  # 4. Nginx (Reverse Proxy & Static Files)
+  nginx:
+    image: nginx:alpine
+    container_name: shop-nginx
     ports:
       - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./cosmetic-shop/uploads:/var/www/uploads
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
-      - backend
+      - database
     networks:
       - shop-network
 

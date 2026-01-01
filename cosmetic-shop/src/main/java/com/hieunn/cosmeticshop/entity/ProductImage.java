@@ -17,6 +17,7 @@ public class ProductImage {
 
     private String imageUrl;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
