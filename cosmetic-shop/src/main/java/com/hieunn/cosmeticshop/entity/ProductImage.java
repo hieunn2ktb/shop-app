@@ -20,5 +20,7 @@ public class ProductImage {
     @com.fasterxml.jackson.annotation.JsonIgnore
     @ManyToOne
     @JoinColumn(name = "product_id")
+    @lombok.ToString.Exclude
+    @lombok.EqualsAndHashCode.Exclude
     private Product product;
 }

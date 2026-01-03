@@ -29,6 +29,11 @@ const AdminLayout = () => {
                             </Link>
                         </li>
                         <li className="nav-item">
+                            <Link to="/admin/brands" className={`nav-link rounded ${isActive('/admin/brands')}`}>
+                                <i className="fas fa-tags me-2"></i> Thương hiệu
+                            </Link>
+                        </li>
+                        <li className="nav-item">
                             <Link to="/admin/orders" className={`nav-link rounded ${isActive('/admin/orders')}`}>
                                 <i className="fas fa-shopping-cart me-2"></i> Đơn hàng
                             </Link>

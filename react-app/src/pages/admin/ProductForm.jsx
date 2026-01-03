@@ -13,10 +13,10 @@ const ProductForm = () => {
         originalPrice: '',
         quantity: '',
         description: '',
-        category: '', // Input ID for now
-        brand: '', // Input ID for now
+        category: '',
+        brand: '',
         imageUrl: '',
-        imageFile: null
+        imageFiles: [] // Changed from imageFile: null
     });
 
     useEffect(() => {
@@ -37,7 +37,7 @@ const ProductForm = () => {
                 category: data.category?.id || '',
                 brand: data.brand?.id || '',
                 imageUrl: data.images?.[0]?.imageUrl || '',
-                imageFile: null
+                imageFiles: []
             });
         }
     };
@@ -53,7 +53,7 @@ const ProductForm = () => {
     const handleFileChange = (e) => {
         setFormData(prev => ({
             ...prev,
-            imageFile: e.target.files[0]
+            imageFiles: Array.from(e.target.files) // Convert FileList to Array
         }));
     };
 
@@ -69,8 +69,10 @@ const ProductForm = () => {
             payload.append('categoryId', formData.category);
             payload.append('brandId', formData.brand);
 
-            if (formData.imageFile) {
-                payload.append('image', formData.imageFile);
+            if (formData.imageFiles.length > 0) {
+                formData.imageFiles.forEach(file => {
+                    payload.append('images', file); // Append each file with key 'images'
+                });
             } else {
                 payload.append('imageUrl', formData.imageUrl);
             }
@@ -128,18 +130,26 @@ const ProductForm = () => {
                     </div>
 
                     <div className="mb-3">
-                        <label className="form-label">Ảnh sản phẩm</label>
-                        <input type="file" className="form-control mb-2" onChange={handleFileChange} accept="image/*" />
-                        <label className="form-label text-muted small">Hoặc nhập URL ảnh:</label>
+                        <label className="form-label">Ảnh sản phẩm (Chọn nhiều ảnh)</label>
+                        <input type="file" className="form-control mb-2" onChange={handleFileChange} accept="image/*" multiple />
+                        <label className="form-label text-muted small">Hoặc nhập URL ảnh (chỉ ảnh chính):</label>
                         <input type="text" className="form-control" name="imageUrl" value={formData.imageUrl} onChange={handleChange} placeholder="https://..." />
-                        {(formData.imageFile || formData.imageUrl) && (
+
+                        {/* Preview Section */}
+                        {(formData.imageFiles.length > 0 || formData.imageUrl) && (
                             <div className="mt-2">
-                                <span className="small text-muted">Preview: </span>
-                                {formData.imageFile ? (
-                                    <span className="text-success fw-bold">{formData.imageFile.name}</span>
-                                ) : (
-                                    <img src={formData.imageUrl} alt="Preview" style={{ height: '50px' }} />
-                                )}
+                                <span className="small text-muted d-block mb-1">Preview: </span>
+                                <div className="d-flex gap-2 flex-wrap">
+                                    {formData.imageFiles.length > 0 ? (
+                                        formData.imageFiles.map((file, idx) => (
+                                            <div key={idx} className="border p-1 rounded">
+                                                <span className="text-success fw-bold small">{file.name}</span>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <img src={formData.imageUrl} alt="Preview" style={{ height: '50px' }} />
+                                    )}
+                                </div>
                             </div>
                         )}
                     </div>

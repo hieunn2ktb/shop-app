@@ -23,7 +23,16 @@ export const register = async (userData) => {
         body: JSON.stringify(userData)
     });
     if (!response.ok) {
-        throw new Error('Registration failed');
+        const errorData = await response.text(); // Or .json() depending on backend error format
+        // Backend returns generic error page or simple string?
+        // Let's assume it returns a string or JSON. Try to parse JSON first.
+        try {
+            const jsonError = JSON.parse(errorData);
+            throw new Error(jsonError.message || jsonError.error || 'Registration failed');
+        } catch (e) {
+            // If not JSON, it might be a plain string from RuntimeException
+            throw new Error(errorData || 'Registration failed');
+        }
     }
     return await response.json();
 };

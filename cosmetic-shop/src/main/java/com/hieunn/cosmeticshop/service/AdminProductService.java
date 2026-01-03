@@ -12,9 +12,9 @@ public interface AdminProductService {
 
     Product getProductById(Long id);
 
-    Product createProduct(ProductDTO productDTO, MultipartFile image) throws IOException;
+    Product createProduct(ProductDTO productDTO, List<MultipartFile> images) throws IOException;
 
-    Product updateProduct(Long id, ProductDTO productDTO, MultipartFile image) throws IOException;
+    Product updateProduct(Long id, ProductDTO productDTO, List<MultipartFile> images) throws IOException;
 
     void deleteProduct(Long id);
 }

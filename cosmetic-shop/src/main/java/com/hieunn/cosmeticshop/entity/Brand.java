@@ -24,5 +24,7 @@ public class Brand {
 
     @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToMany(mappedBy = "brand")
+    @lombok.ToString.Exclude
+    @lombok.EqualsAndHashCode.Exclude
     private List<Product> products;
 }

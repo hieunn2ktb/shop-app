@@ -25,6 +25,8 @@ public class User implements UserDetails {
     private String username;
 
     @Column(nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    @lombok.ToString.Exclude
     private String password;
 
     private String fullName;

@@ -11,6 +11,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.hieunn.cosmeticshop.dto.request.ProductFilterRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
+
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +28,22 @@ import java.util.Map;
 public class HomeController {
 
     private final HomeService homeService;
+
+    @PostMapping("/products")
+    public ResponseEntity<Page<Product>> searchProducts(@RequestBody ProductFilterRequest request) {
+        return ResponseEntity.ok(homeService.searchProducts(request));
+    }
+
+    @PostMapping("/filter-options")
+    public ResponseEntity<com.hieunn.cosmeticshop.dto.response.FilterMetadataResponse> getFilterMetadata(
+            @RequestBody ProductFilterRequest request) {
+        return ResponseEntity.ok(homeService.getFilterMetadata(request));
+    }
+
+    @GetMapping("/products/{id}")
+    public ResponseEntity<Product> getProductById(@PathVariable Long id) {
+        return ResponseEntity.ok(homeService.getProductById(id));
+    }
 
     @GetMapping("/categories")
     public ResponseEntity<List<Category>> getCategories() {

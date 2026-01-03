@@ -1,6 +1,6 @@
 import { getCurrentUser } from './authService';
 
-const API_URL = 'http://localhost:8080/api/orders';
+const API_URL = '/api/orders'; // Updated to use proxy
 
 const getAuthHeaders = () => {
     const user = getCurrentUser();

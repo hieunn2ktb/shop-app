@@ -29,5 +29,7 @@ public class Category {
 
     @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
+    @lombok.ToString.Exclude
+    @lombok.EqualsAndHashCode.Exclude
     private List<Product> products;
 }

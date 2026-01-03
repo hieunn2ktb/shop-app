@@ -23,5 +23,7 @@ public class Cart {
     private User user;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+    @lombok.ToString.Exclude
+    @lombok.EqualsAndHashCode.Exclude
     private List<CartItem> items = new ArrayList<>();
 }

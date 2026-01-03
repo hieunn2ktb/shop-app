@@ -18,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -44,7 +43,7 @@ public class AdminProductServiceImpl implements AdminProductService {
 
     @Override
     @Transactional
-    public Product createProduct(ProductDTO dto, MultipartFile image) throws IOException { // Added exception
+    public Product createProduct(ProductDTO dto, List<MultipartFile> images) throws IOException { // Added exception
         Product product = new Product();
         mapDtoToEntity(dto, product);
 
@@ -53,16 +52,17 @@ public class AdminProductServiceImpl implements AdminProductService {
 
         Product savedProduct = productRepository.save(product);
 
-        // Handle Image
-        if (image != null && !image.isEmpty()) {
-            String fileName = fileStorageService.storeFile(image);
-            ProductImage productImage = new ProductImage();
-            // Store relative path or full URL. Usually relative path /uploads/filename is
-            // good.
-            // But frontend expects full URL or path. Let's store /uploads/filename
-            productImage.setImageUrl("http://localhost/uploads/" + fileName);
-            productImage.setProduct(savedProduct);
-            productImageRepository.save(productImage);
+        // Handle Images
+        if (images != null && !images.isEmpty()) {
+            for (MultipartFile image : images) {
+                if (!image.isEmpty()) {
+                    String fileName = fileStorageService.storeFile(image);
+                    ProductImage productImage = new ProductImage();
+                    productImage.setImageUrl("http://localhost/uploads/" + fileName);
+                    productImage.setProduct(savedProduct);
+                    productImageRepository.save(productImage);
+                }
+            }
         } else if (dto.getImageUrl() != null && !dto.getImageUrl().isEmpty()) {
             // Fallback to URL if provided textually (optional)
             ProductImage productImage = new ProductImage();
@@ -76,20 +76,22 @@ public class AdminProductServiceImpl implements AdminProductService {
 
     @Override
     @Transactional
-    public Product updateProduct(Long id, ProductDTO dto, MultipartFile image) throws IOException {
+    public Product updateProduct(Long id, ProductDTO dto, List<MultipartFile> images) throws IOException {
         Product product = getProductById(id);
         mapDtoToEntity(dto, product);
 
         Product savedProduct = productRepository.save(product);
 
-        if (image != null && !image.isEmpty()) {
-            String fileName = fileStorageService.storeFile(image);
-            // Logic to replace existing main image or add new one?
-            // For simplicity, let's just add it.
-            ProductImage productImage = new ProductImage();
-            productImage.setImageUrl("http://localhost/uploads/" + fileName);
-            productImage.setProduct(savedProduct);
-            productImageRepository.save(productImage);
+        if (images != null && !images.isEmpty()) {
+            for (MultipartFile image : images) {
+                if (!image.isEmpty()) {
+                    String fileName = fileStorageService.storeFile(image);
+                    ProductImage productImage = new ProductImage();
+                    productImage.setImageUrl("http://localhost/uploads/" + fileName);
+                    productImage.setProduct(savedProduct);
+                    productImageRepository.save(productImage);
+                }
+            }
         }
 
         return savedProduct;

@@ -33,16 +33,20 @@ public class AdminProductController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Product> createProduct(
             @ModelAttribute ProductDTO productDTO,
-            @RequestParam(value = "image", required = false) MultipartFile image) throws IOException {
-        return ResponseEntity.ok(adminProductService.createProduct(productDTO, image));
+            @RequestParam(value = "images", required = false) List<MultipartFile> images) throws IOException { // Changed
+                                                                                                               // to
+                                                                                                               // images
+        return ResponseEntity.ok(adminProductService.createProduct(productDTO, images));
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Product> updateProduct(
             @PathVariable Long id,
             @ModelAttribute ProductDTO productDTO,
-            @RequestParam(value = "image", required = false) MultipartFile image) throws IOException {
-        return ResponseEntity.ok(adminProductService.updateProduct(id, productDTO, image));
+            @RequestParam(value = "images", required = false) List<MultipartFile> images) throws IOException { // Changed
+                                                                                                               // to
+                                                                                                               // images
+        return ResponseEntity.ok(adminProductService.updateProduct(id, productDTO, images));
     }
 
     @DeleteMapping("/{id}")

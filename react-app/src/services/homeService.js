@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8080/api/home';
+const API_BASE_URL = '/api/home'; // Updated to use proxy
 
 export const getCategories = async () => {
     try {
@@ -41,5 +41,50 @@ export const getProductSections = async () => {
     } catch (error) {
         console.error("Error fetching sections:", error);
         return {};
+    }
+};
+
+export const searchProducts = async (filter) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/products`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(filter),
+        });
+        if (!response.ok) throw new Error('Failed to search products');
+        return await response.json();
+    } catch (error) {
+        console.error("Error searching products:", error);
+        return { content: [], totalPages: 0 };
+    }
+};
+
+export const getFilterOptions = async (filter) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/filter-options`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(filter),
+        });
+        if (!response.ok) throw new Error('Failed to get filter options');
+        return await response.json();
+    } catch (error) {
+        console.error("Error getting filter options:", error);
+        return { brands: [], categories: [] };
+    }
+};
+
+export const getProductById = async (id) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/products/${id}`);
+        if (!response.ok) throw new Error('Failed to fetch product');
+        return await response.json();
+    } catch (error) {
+        console.error("Error fetching product:", error);
+        return null;
     }
 };

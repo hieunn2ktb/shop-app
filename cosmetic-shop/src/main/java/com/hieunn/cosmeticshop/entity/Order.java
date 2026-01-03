@@ -36,5 +36,7 @@ public class Order {
     private String paymentMethod; // COD, BANKING
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @lombok.ToString.Exclude
+    @lombok.EqualsAndHashCode.Exclude
     private List<OrderItem> orderItems;
 }

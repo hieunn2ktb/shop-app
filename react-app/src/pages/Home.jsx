@@ -18,9 +18,8 @@ import brand4 from '../assets/img/brand_04.png';
 
 // Helper to resolve image (using placeholder if null/empty for now)
 const resolveImage = (imgName) => {
-    if (!imgName) return feat1;
-    // Logic to handle real URLs vs local assets would go here
-    return feat1; // Fallback for now since DB images might be just filenames
+    if (imgName && imgName.trim() !== '') return imgName;
+    return feat1; // Fallback
 };
 
 const Home = () => {
@@ -32,7 +31,8 @@ const Home = () => {
         faceCare: [],
         sets: [],
         sunCare: [],
-        cleansing: []
+        cleansing: [],
+        trial: []
     });
 
     useEffect(() => {
@@ -115,7 +115,7 @@ const Home = () => {
                             ]).map((cat, index) => (
                                 <div key={index} className="col">
                                     <div className="category-item p-2 h-100">
-                                        <Link to="/shop" className="text-decoration-none text-dark">
+                                        <Link to="/shop" state={{ category: cat.name }} className="text-decoration-none text-dark">
                                             <div className="mb-2">
                                                 <img
                                                     src={resolveImage(cat.image)}
@@ -204,13 +204,18 @@ const Home = () => {
                                             </button>
                                         </div>
 
-                                        <Link to="/shop-single">
-                                            <img src={resolveImage(item.images?.[0]?.imageUrl)} className="card-img-top p-3" alt={item.name} />
+                                        <Link to={`/shop-single/${item.id}`}>
+                                            <img
+                                                src={resolveImage(item.images?.[0]?.imageUrl)}
+                                                className="card-img-top p-3"
+                                                alt={item.name}
+                                                style={{ height: '250px', objectFit: 'contain' }}
+                                            />
                                         </Link>
 
                                         <div className="card-body p-2 d-flex flex-column">
                                             <small className="text-uppercase text-muted" style={{ fontSize: '0.75rem' }}>{item.brand?.name || "Linh Cosmetics"}</small>
-                                            <Link to="/shop-single" className="text-decoration-none text-dark mb-2">
+                                            <Link to={`/shop-single/${item.id}`} className="text-decoration-none text-dark mb-2">
                                                 <h6 className="card-title text-truncate" style={{ fontSize: '0.9rem' }}>{item.name}</h6>
                                             </Link>
 
@@ -284,11 +289,15 @@ const Home = () => {
                                         { name: "Brand 1", logo: null }, { name: "Brand 2", logo: null }, { name: "Brand 3", logo: null }
                                     ]).map((brand, index) => (
                                         <div key={index} className="col">
-                                            <div className="border rounded p-3 text-center h-100 d-flex align-items-center justify-content-center hover-shadow" style={{ minHeight: '130px' }}>
-                                                <img src={resolveImage(brand.logo)} className="img-fluid" style={{ maxHeight: '60px', filter: 'grayscale(100%)', opacity: '0.7', transition: 'all 0.3s' }}
+                                            <div className="border rounded p-1 text-center d-flex align-items-center justify-content-center hover-shadow" style={{ height: '130px' }}>
+                                                <img
+                                                    src={resolveImage(brand.logo)}
+                                                    className="img-fluid"
+                                                    style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'grayscale(100%)', opacity: '0.7', transition: 'all 0.3s' }}
                                                     onMouseOver={(e) => { e.currentTarget.style.filter = 'none'; e.currentTarget.style.opacity = '1'; }}
                                                     onMouseOut={(e) => { e.currentTarget.style.filter = 'grayscale(100%)'; e.currentTarget.style.opacity = '0.7'; }}
-                                                    alt={brand.name} />
+                                                    alt={brand.name}
+                                                />
                                             </div>
                                         </div>
                                     ))}
@@ -313,43 +322,57 @@ const Home = () => {
 
                         {/* Product Grid */}
                         <div className="row row-cols-2 row-cols-md-5 g-3">
-                            {[
-                                { name: "[Mới] Kem BB Trang Điểm Chống Nắng The Whoo...", brand: "WHOO", price: "800.000đ", oldPrice: "1.350.000đ", discount: "-30%", img: feat1 },
-                                { name: "Bảng Phấn Mắt Ohui Real Color Eye Palette 9 màu", brand: "OHUI", price: "450.000đ", oldPrice: "620.000đ", discount: "-27%", img: feat2 },
-                                { name: "Bộ Kem BB Trang Điểm Chống Nắng The Whoo Gongjinhyang...", brand: "WHOO", price: "800.000đ", oldPrice: "1.300.000đ", discount: "-38%", img: feat3 },
-                                { name: "Bộ Kem Lót Trang Điểm Whoo Gongjinhyang Mi Essential...", brand: "WHOO", price: "750.000đ", oldPrice: "1.300.000đ", discount: "-42%", img: feat1 },
-                                { name: "Bộ Kem Nền Dạng Thỏi Ohui Ultimate Cover Stick...", brand: "OHUI", price: "750.000đ", oldPrice: "1.300.000đ", discount: "-42%", img: feat2 },
-                            ].map((item, index) => (
+                            {(sections.makeup && sections.makeup.length > 0 ? sections.makeup : [
+                                // Fallback/Loading state or keep empty for now
+                            ]).map((item, index) => (
                                 <div key={index} className="col">
                                     <div className="card h-100 border-0 shadow-sm">
                                         <div className="position-relative">
                                             {/* Discount Badge */}
-                                            <span className="position-absolute top-0 start-0 badge bg-warning text-dark m-2 rounded-0">
-                                                {item.discount}
-                                            </span>
+                                            {item.originalPrice > item.price && (
+                                                <span className="position-absolute top-0 start-0 badge bg-warning text-dark m-2 rounded-0">
+                                                    -{Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100)}%
+                                                </span>
+                                            )}
                                             {/* Icons */}
                                             <div className="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
                                                 <button className="btn btn-sm btn-outline-secondary bg-white rounded-circle p-1" style={{ width: '30px', height: '30px' }}>
                                                     <i className="far fa-heart"></i>
                                                 </button>
-                                                <button className="btn btn-sm btn-outline-secondary bg-white rounded-circle p-1" style={{ width: '30px', height: '30px' }}>
+                                                <button
+                                                    className="btn btn-sm btn-outline-secondary bg-white rounded-circle p-1"
+                                                    style={{ width: '30px', height: '30px' }}
+                                                    onClick={async () => {
+                                                        try {
+                                                            await addToCart(item.id, 1);
+                                                            alert('Đã thêm vào giỏ hàng!');
+                                                        } catch (err) {
+                                                            alert(err.message);
+                                                        }
+                                                    }}
+                                                >
                                                     <i className="fas fa-shopping-bag"></i>
                                                 </button>
                                             </div>
 
-                                            <Link to="/shop-single">
-                                                <img src={item.img} className="card-img-top p-3" alt={item.name} />
+                                            <Link to={`/shop-single/${item.id}`}>
+                                                <img
+                                                    src={resolveImage(item.images?.[0]?.imageUrl)}
+                                                    className="card-img-top p-3"
+                                                    alt={item.name}
+                                                    style={{ height: '250px', objectFit: 'contain' }}
+                                                />
                                             </Link>
                                         </div>
 
                                         <div className="card-body p-2">
-                                            <small className="text-uppercase text-muted fw-bold" style={{ fontSize: '0.7rem' }}>{item.brand}</small>
-                                            <Link to="/shop-single" className="text-decoration-none text-dark d-block mb-2">
+                                            <small className="text-uppercase text-muted fw-bold" style={{ fontSize: '0.7rem' }}>{item.brand?.name || "Linh Cosmetics"}</small>
+                                            <Link to={`/shop-single/${item.id}`} className="text-decoration-none text-dark d-block mb-2">
                                                 <h6 className="card-title text-truncate" style={{ fontSize: '0.9rem' }}>{item.name}</h6>
                                             </Link>
                                             <div className="d-flex align-items-baseline">
-                                                <span className="text-warning fw-bold me-2">{item.price}</span>
-                                                <small className="text-muted text-decoration-line-through" style={{ fontSize: '0.75rem' }}>{item.oldPrice}</small>
+                                                <span className="text-warning fw-bold me-2">{item.price?.toLocaleString()}đ</span>
+                                                {item.originalPrice && <small className="text-muted text-decoration-line-through" style={{ fontSize: '0.75rem' }}>{item.originalPrice.toLocaleString()}đ</small>}
                                             </div>
                                         </div>
                                     </div>
@@ -373,49 +396,58 @@ const Home = () => {
 
                         {/* Product Grid */}
                         <div className="row row-cols-2 row-cols-md-5 g-3 mb-4">
-                            {[
-                                { name: "[Mẫu Mới] Kem Dưỡng Da Sulwhasoo The Ultimate S...", brand: "SULWHASOO", price: "8.500.000đ", oldPrice: "11.500.000đ", discount: "-26%", img: cat1 },
-                                { name: "[Mới] Kem BB Trang Điểm Chống Nắng The Whoo Gongjinhyang...", brand: "WHOO", price: "800.000đ", oldPrice: "1.250.000đ", discount: "-36%", img: cat2 },
-                                { name: "[MỚI] Set Sữa Rửa Mặt Ohui Age Recovery Soft Amino Foam...", brand: "OHUI", price: "650.000đ", oldPrice: "850.000đ", discount: "-24%", img: cat3 },
-                                { name: "[MỚI] Set Tinh Chất Tự Sinh Chống Lão Hóa Whoo Bichup...", brand: "WHOO", price: "2.290.000đ", oldPrice: "3.500.000đ", discount: "-35%", img: feat1 },
-                                { name: "[MỚI] Set Tinh Chất Tự Sinh Chống Lão Hóa Whoo Bichup...", brand: "WHOO", price: "2.900.000đ", oldPrice: "6.000.000đ", discount: "-52%", img: feat2 },
-                                { name: "[MỚI] Set Tinh Chất Tự Sinh Chống Lão Hóa Whoo Bichup...", brand: "WHOO", price: "4.990.000đ", oldPrice: "8.600.000đ", discount: "-42%", img: feat3 },
-                                { name: "[Phiên bản giàu dưỡng] Bộ Kem Dưỡng Chống Lão Hóa Nhân...", brand: "SULWHASOO", price: "3.900.000đ", oldPrice: "5.400.000đ", discount: "-28%", img: cat1 },
-                                { name: "[SALE] Tinh Chất Tẩy Da Chết Dưỡng Trắng Sum37...", brand: "SUM37", price: "1.650.000đ", oldPrice: "3.000.000đ", discount: "-45%", img: cat2 },
-                                { name: "[Tháng 12/2026] Kem Dưỡng Tái Sinh Chống Lão Hóa Da Ohui...", brand: "OHUI", price: "2.900.000đ", oldPrice: "5.900.000đ", discount: "-51%", img: cat3 },
-                                { name: "[XẢ DATE 2026] Bộ Dưỡng Da Dành Cho Nam Giới Whoo...", brand: "WHOO", price: "1.190.000đ", oldPrice: "2.900.000đ", discount: "-59%", img: feat1 },
-                            ].map((item, index) => (
+                            {(sections.faceCare && sections.faceCare.length > 0 ? sections.faceCare : [
+                                // Fallback/Loading state or keep empty
+                            ]).map((item, index) => (
                                 <div key={index} className="col">
                                     <div className="card h-100 border-0 shadow-sm position-relative">
                                         <div className="position-relative">
                                             {/* Discount Badge */}
-                                            <span className="position-absolute top-0 start-0 badge m-2 rounded-0" style={{ backgroundColor: '#ff6600' }}>
-                                                {item.discount}
-                                            </span>
+                                            {item.originalPrice > item.price && (
+                                                <span className="position-absolute top-0 start-0 badge m-2 rounded-0" style={{ backgroundColor: '#ff6600' }}>
+                                                    -{Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100)}%
+                                                </span>
+                                            )}
                                             {/* Icons */}
                                             <div className="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
                                                 <button className="btn btn-sm btn-outline-secondary bg-white rounded-circle p-1" style={{ width: '30px', height: '30px' }}>
                                                     <i className="far fa-heart"></i>
                                                 </button>
-                                                <button className="btn btn-sm btn-outline-secondary bg-white rounded-circle p-1" style={{ width: '30px', height: '30px' }}>
+                                                <button
+                                                    className="btn btn-sm btn-outline-secondary bg-white rounded-circle p-1"
+                                                    style={{ width: '30px', height: '30px' }}
+                                                    onClick={async () => {
+                                                        try {
+                                                            await addToCart(item.id, 1);
+                                                            alert('Đã thêm vào giỏ hàng!');
+                                                        } catch (err) {
+                                                            alert(err.message);
+                                                        }
+                                                    }}
+                                                >
                                                     <i className="fas fa-shopping-bag"></i>
                                                 </button>
                                             </div>
 
-                                            <Link to="/shop-single">
-                                                <img src={item.img} className="card-img-top p-3" alt={item.name} />
+                                            <Link to={`/shop-single/${item.id}`}>
+                                                <img
+                                                    src={resolveImage(item.images?.[0]?.imageUrl)}
+                                                    className="card-img-top p-3"
+                                                    alt={item.name}
+                                                    style={{ height: '250px', objectFit: 'contain' }}
+                                                />
                                             </Link>
                                         </div>
 
                                         <div className="card-body p-2 d-flex flex-column">
-                                            <small className="text-uppercase text-muted fw-bold mb-1" style={{ fontSize: '0.7rem' }}>{item.brand}</small>
-                                            <Link to="/shop-single" className="text-decoration-none text-dark mb-2">
+                                            <small className="text-uppercase text-muted fw-bold mb-1" style={{ fontSize: '0.7rem' }}>{item.brand?.name || "Linh Cosmetics"}</small>
+                                            <Link to={`/shop-single/${item.id}`} className="text-decoration-none text-dark mb-2">
                                                 <h6 className="card-title text-truncate" style={{ fontSize: '0.9rem' }}>{item.name}</h6>
                                             </Link>
                                             <div className="mt-auto">
                                                 <div className="d-flex align-items-baseline">
-                                                    <span className="fw-bold me-2" style={{ color: '#ff6600' }}>{item.price}</span>
-                                                    <small className="text-muted text-decoration-line-through" style={{ fontSize: '0.75rem' }}>{item.oldPrice}</small>
+                                                    <span className="fw-bold me-2" style={{ color: '#ff6600' }}>{item.price?.toLocaleString()}đ</span>
+                                                    {item.originalPrice && <small className="text-muted text-decoration-line-through" style={{ fontSize: '0.75rem' }}>{item.originalPrice.toLocaleString()}đ</small>}
                                                 </div>
                                             </div>
                                         </div>
@@ -447,49 +479,58 @@ const Home = () => {
 
                         {/* Product Grid */}
                         <div className="row row-cols-2 row-cols-md-5 g-3 mb-4">
-                            {[
-                                { name: "[Phiên bản giàu dưỡng] Bộ Kem Dưỡng Chống Lão Hóa Nhân...", brand: "SULWHASOO", price: "3.900.000đ", oldPrice: "5.400.000đ", discount: "-28%", img: cat1 },
-                                { name: "[XẢ DATE 2026] Bộ Dưỡng Da Dành Cho Nam Giới Whoo...", brand: "WHOO", price: "1.190.000đ", oldPrice: "2.900.000đ", discount: "-59%", img: cat2 },
-                                { name: "Bộ Chống Lão Hóa Ohui Tím Ohui Age Recovery Special Set...", brand: "OHUI", price: "1.790.000đ", oldPrice: "3.500.000đ", discount: "-49%", img: cat3 },
-                                { name: "Bộ Dầu Gội và Xả Whoo Spa Shampoo & Rinse", brand: "WHOO", price: "990.000đ", oldPrice: "1.600.000đ", discount: "-38%", img: feat1 },
-                                { name: "Bộ Dưỡng Ẩm Ohui Miracle Moisture 2pcs Special Set Mẫu...", brand: "OHUI", price: "1.250.000đ", oldPrice: "1.900.000đ", discount: "-34%", img: feat2 },
-                                { name: "Bộ Dưỡng Da 2 Tầng Tái Sinh Cao Cấp Whoo Cheongidan Pr...", brand: "WHOO", price: "10.200.000đ", oldPrice: "17.000.000đ", discount: "-40%", img: feat3 },
-                                { name: "Bộ Dưỡng Da Chống Lão Hóa Cao Cấp 2 Tầng Whoo...", brand: "WHOO", price: "16.800.000đ", oldPrice: "20.000.000đ", discount: "-40%", img: cat1 },
-                                { name: "Bộ Dưỡng Da Chống Lão Hóa Cao Cấp The Whoo...", brand: "WHOO", price: "4.390.000đ", oldPrice: "7.200.000đ", discount: "-39%", img: cat2 },
-                                { name: "Bộ Dưỡng Da Chống Lão Hóa Nhân Sâm Sulwhasoo...", brand: "SULWHASOO", price: "3.200.000đ", oldPrice: "4.100.000đ", discount: "-22%", img: cat3 },
-                                { name: "Bộ Dưỡng Da Chống Lão Hóa Sum37 LosecSumma 4pcs...", brand: "SUM37", price: "3.690.000đ", oldPrice: "6.700.000đ", discount: "-45%", img: feat1 },
-                            ].map((item, index) => (
+                            {(sections.sets && sections.sets.length > 0 ? sections.sets : [
+                                // Fallback/Loading state or keep empty
+                            ]).map((item, index) => (
                                 <div key={index} className="col">
                                     <div className="card h-100 border-0 shadow-sm position-relative">
                                         <div className="position-relative">
                                             {/* Discount Badge */}
-                                            <span className="position-absolute top-0 start-0 badge m-2 rounded-0" style={{ backgroundColor: '#ff6600' }}>
-                                                {item.discount}
-                                            </span>
+                                            {item.originalPrice > item.price && (
+                                                <span className="position-absolute top-0 start-0 badge m-2 rounded-0" style={{ backgroundColor: '#ff6600' }}>
+                                                    -{Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100)}%
+                                                </span>
+                                            )}
                                             {/* Icons */}
                                             <div className="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
                                                 <button className="btn btn-sm btn-outline-secondary bg-white rounded-circle p-1" style={{ width: '30px', height: '30px' }}>
                                                     <i className="far fa-heart"></i>
                                                 </button>
-                                                <button className="btn btn-sm btn-outline-secondary bg-white rounded-circle p-1" style={{ width: '30px', height: '30px' }}>
+                                                <button
+                                                    className="btn btn-sm btn-outline-secondary bg-white rounded-circle p-1"
+                                                    style={{ width: '30px', height: '30px' }}
+                                                    onClick={async () => {
+                                                        try {
+                                                            await addToCart(item.id, 1);
+                                                            alert('Đã thêm vào giỏ hàng!');
+                                                        } catch (err) {
+                                                            alert(err.message);
+                                                        }
+                                                    }}
+                                                >
                                                     <i className="fas fa-shopping-bag"></i>
                                                 </button>
                                             </div>
 
-                                            <Link to="/shop-single">
-                                                <img src={item.img} className="card-img-top p-3" alt={item.name} />
+                                            <Link to={`/shop-single/${item.id}`}>
+                                                <img
+                                                    src={resolveImage(item.images?.[0]?.imageUrl)}
+                                                    className="card-img-top p-3"
+                                                    alt={item.name}
+                                                    style={{ height: '250px', objectFit: 'contain' }}
+                                                />
                                             </Link>
                                         </div>
 
                                         <div className="card-body p-2 d-flex flex-column">
-                                            <small className="text-uppercase text-muted fw-bold mb-1" style={{ fontSize: '0.7rem' }}>{item.brand}</small>
-                                            <Link to="/shop-single" className="text-decoration-none text-dark mb-2">
+                                            <small className="text-uppercase text-muted fw-bold mb-1" style={{ fontSize: '0.7rem' }}>{item.brand?.name || "Linh Cosmetics"}</small>
+                                            <Link to={`/shop-single/${item.id}`} className="text-decoration-none text-dark mb-2">
                                                 <h6 className="card-title text-truncate" style={{ fontSize: '0.9rem' }}>{item.name}</h6>
                                             </Link>
                                             <div className="mt-auto">
                                                 <div className="d-flex align-items-baseline">
-                                                    <span className="fw-bold me-2" style={{ color: '#ff6600' }}>{item.price}</span>
-                                                    <small className="text-muted text-decoration-line-through" style={{ fontSize: '0.75rem' }}>{item.oldPrice}</small>
+                                                    <span className="fw-bold me-2" style={{ color: '#ff6600' }}>{item.price?.toLocaleString()}đ</span>
+                                                    {item.originalPrice && <small className="text-muted text-decoration-line-through" style={{ fontSize: '0.75rem' }}>{item.originalPrice.toLocaleString()}đ</small>}
                                                 </div>
                                             </div>
                                         </div>
@@ -521,25 +562,16 @@ const Home = () => {
 
                         {/* Product Grid */}
                         <div className="row row-cols-2 row-cols-md-5 g-3 mb-4">
-                            {[
-                                { name: "[Mới] Kem BB Trang Điểm Chống Nắng The Whoo...", brand: "WHOO", price: "800.000đ", oldPrice: "1.250.000đ", discount: "-36%", img: feat1 },
-                                { name: "Bộ Kem BB Trang Điểm Chống Nắng The Whoo...", brand: "WHOO", price: "800.000đ", oldPrice: "1.300.000đ", discount: "-38%", img: feat2 },
-                                { name: "Bộ Kem Chống Nắng Chống Nhăn Whoo...", brand: "WHOO", price: "850.000đ", oldPrice: "1.600.000đ", discount: "-47%", img: feat3 },
-                                { name: "Bộ Kem Chống Nắng Đa Tính Năng SUM37...", brand: "SUM37", price: "1.050.000đ", oldPrice: "", discount: "", img: cat1 },
-                                { name: "Bộ Kem Chống Nắng Nâng Tone SUM37 Sun-...", brand: "SUM37", price: "750.000đ", oldPrice: "1.200.000đ", discount: "-38%", img: cat2 },
-                                { name: "Bộ Kem Chống Nắng Ohui Day Shield Perfect Sun...", brand: "OHUI", price: "700.000đ", oldPrice: "1.100.000đ", discount: "-36%", img: cat3 },
-                                { name: "Bộ Kem Chống Nắng Sum37 Làm Mát Da Sun...", brand: "SUM37", price: "750.000đ", oldPrice: "1.200.000đ", discount: "-38%", img: feat1 },
-                                { name: "Bộ Phấn Chống Nắng The Whoo UV Ultimate Anti...", brand: "WHOO", price: "790.000đ", oldPrice: "1.400.000đ", discount: "-44%", img: feat2 },
-                                { name: "Bộ Tinh Chất Chống Nắng Chống Lão Hóa Làm Dịu...", brand: "WHOO", price: "690.000đ", oldPrice: "1.350.000đ", discount: "-49%", img: feat3 },
-                                { name: "Bộ Tinh Chất Chống Nắng Chống Lão Hóa Làm Dịu...", brand: "WHOO", price: "890.000đ", oldPrice: "1.400.000đ", discount: "-36%", img: cat1 },
-                            ].map((item, index) => (
+                            {(sections.sunCare && sections.sunCare.length > 0 ? sections.sunCare : [
+                                // Fallback
+                            ]).map((item, index) => (
                                 <div key={index} className="col">
                                     <div className="card h-100 border-0 shadow-sm position-relative">
                                         <div className="position-relative">
                                             {/* Discount Badge */}
-                                            {item.discount && (
+                                            {item.originalPrice > item.price && (
                                                 <span className="position-absolute top-0 start-0 badge m-2 rounded-0" style={{ backgroundColor: '#ff6600' }}>
-                                                    {item.discount}
+                                                    -{Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100)}%
                                                 </span>
                                             )}
                                             {/* Icons */}
@@ -547,25 +579,41 @@ const Home = () => {
                                                 <button className="btn btn-sm btn-outline-secondary bg-white rounded-circle p-1" style={{ width: '30px', height: '30px' }}>
                                                     <i className="far fa-heart"></i>
                                                 </button>
-                                                <button className="btn btn-sm btn-outline-secondary bg-white rounded-circle p-1" style={{ width: '30px', height: '30px' }}>
+                                                <button
+                                                    className="btn btn-sm btn-outline-secondary bg-white rounded-circle p-1"
+                                                    style={{ width: '30px', height: '30px' }}
+                                                    onClick={async () => {
+                                                        try {
+                                                            await addToCart(item.id, 1);
+                                                            alert('Đã thêm vào giỏ hàng!');
+                                                        } catch (err) {
+                                                            alert(err.message);
+                                                        }
+                                                    }}
+                                                >
                                                     <i className="fas fa-shopping-bag"></i>
                                                 </button>
                                             </div>
 
-                                            <Link to="/shop-single">
-                                                <img src={item.img} className="card-img-top p-3" alt={item.name} />
+                                            <Link to={`/shop-single/${item.id}`}>
+                                                <img
+                                                    src={resolveImage(item.images?.[0]?.imageUrl)}
+                                                    className="card-img-top p-3"
+                                                    alt={item.name}
+                                                    style={{ height: '250px', objectFit: 'contain' }}
+                                                />
                                             </Link>
                                         </div>
 
                                         <div className="card-body p-2 d-flex flex-column">
-                                            <small className="text-uppercase text-muted fw-bold mb-1" style={{ fontSize: '0.7rem' }}>{item.brand}</small>
-                                            <Link to="/shop-single" className="text-decoration-none text-dark mb-2">
+                                            <small className="text-uppercase text-muted fw-bold mb-1" style={{ fontSize: '0.7rem' }}>{item.brand?.name || "Linh Cosmetics"}</small>
+                                            <Link to={`/shop-single/${item.id}`} className="text-decoration-none text-dark mb-2">
                                                 <h6 className="card-title text-truncate" style={{ fontSize: '0.9rem' }}>{item.name}</h6>
                                             </Link>
                                             <div className="mt-auto">
                                                 <div className="d-flex align-items-baseline">
-                                                    <span className="fw-bold me-2" style={{ color: '#ff6600' }}>{item.price}</span>
-                                                    {item.oldPrice && <small className="text-muted text-decoration-line-through" style={{ fontSize: '0.75rem' }}>{item.oldPrice}</small>}
+                                                    <span className="fw-bold me-2" style={{ color: '#ff6600' }}>{item.price?.toLocaleString()}đ</span>
+                                                    {item.originalPrice && <small className="text-muted text-decoration-line-through" style={{ fontSize: '0.75rem' }}>{item.originalPrice.toLocaleString()}đ</small>}
                                                 </div>
                                             </div>
                                         </div>
@@ -603,74 +651,61 @@ const Home = () => {
                                 <button type="button" data-bs-target="#carouselCleansing" data-bs-slide-to="1"></button>
                             </div>
                             <div className="carousel-inner pb-2">
-                                <div className="carousel-item active">
-                                    <div className="row row-cols-2 row-cols-md-5 g-3">
-                                        {[
-                                            { name: "60 gói Tẩy Da Chết Làm Sáng Da Whoo Brightening Gel 1ml*60", brand: "KHÁC", price: "400.000đ", oldPrice: "1.000.000đ", discount: "-60%", img: feat1 },
-                                            { name: "[MỚI] Set Sữa Rửa Mặt Ohui Age Recovery Soft Amino Foam...", brand: "OHUI", price: "650.000đ", oldPrice: "850.000đ", discount: "-24%", img: cat3 },
-                                            { name: "[SALE] Tinh Chất Tẩy Da Chết Dưỡng Trắng Sum37 LosecSumm...", brand: "SUM37", price: "1.650.000đ", oldPrice: "3.000.000đ", discount: "-45%", img: cat2 },
-                                            { name: "Bộ Dầu Tẩy Trang Ohui Miracle Moisture Cleansing Oil", brand: "OHUI", price: "550.000đ", oldPrice: "750.000đ", discount: "-27%", img: feat2 },
-                                            { name: "Bộ Nước Tẩy Trang Dịu Nhẹ SUM37 Skin Saver Essential Pure...", brand: "SUM37", price: "650.000đ", oldPrice: "800.000đ", discount: "-19%", img: feat3 },
-                                        ].map((item, index) => (
-                                            <div key={index} className="col">
-                                                <div className="card h-100 border-0 shadow-sm">
-                                                    <div className="position-relative">
-                                                        <span className="position-absolute top-0 start-0 badge m-2 rounded-0" style={{ backgroundColor: '#ff6600' }}>{item.discount}</span>
-                                                        <div className="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
-                                                            <button className="btn btn-sm btn-outline-secondary bg-white rounded-circle p-1" style={{ width: '30px', height: '30px' }}><i className="far fa-heart"></i></button>
-                                                            <button className="btn btn-sm btn-outline-secondary bg-white rounded-circle p-1" style={{ width: '30px', height: '30px' }}><i className="fas fa-shopping-bag"></i></button>
+                                {(sections.cleansing && sections.cleansing.length > 0 ? sections.cleansing : []).reduce((acc, item, index) => {
+                                    const chunkIndex = Math.floor(index / 5);
+                                    if (!acc[chunkIndex]) acc[chunkIndex] = [];
+                                    acc[chunkIndex].push(item);
+                                    return acc;
+                                }, []).length === 0 ? (
+                                    // Empty Logic if needed
+                                    <div className="text-center">Đang cập nhật...</div>
+                                ) : (
+                                    (sections.cleansing || []).reduce((acc, item, index) => {
+                                        const chunkIndex = Math.floor(index / 5);
+                                        if (!acc[chunkIndex]) acc[chunkIndex] = [];
+                                        acc[chunkIndex].push(item);
+                                        return acc;
+                                    }, []).map((chunk, i) => (
+                                        <div key={i} className={`carousel-item ${i === 0 ? 'active' : ''}`}>
+                                            <div className="row row-cols-2 row-cols-md-5 g-3">
+                                                {chunk.map((item, index) => (
+                                                    <div key={index} className="col">
+                                                        <div className="card h-100 border-0 shadow-sm position-relative">
+                                                            <div className="position-relative">
+                                                                {/* Discount Badge */}
+                                                                {item.originalPrice > item.price && (
+                                                                    <span className="position-absolute top-0 start-0 badge m-2 rounded-0" style={{ backgroundColor: '#ff6600' }}>
+                                                                        -{Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100)}%
+                                                                    </span>
+                                                                )}
+                                                                {/* Icons */}
+                                                                <div className="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
+                                                                    <button className="btn btn-sm btn-outline-secondary bg-white rounded-circle p-1" style={{ width: '30px', height: '30px' }}><i className="far fa-heart"></i></button>
+                                                                    <button className="btn btn-sm btn-outline-secondary bg-white rounded-circle p-1" style={{ width: '30px', height: '30px' }}><i className="fas fa-shopping-bag"></i></button>
+                                                                </div>
+                                                                <Link to={`/shop-single/${item.id}`}>
+                                                                    <img src={resolveImage(item.images?.[0]?.imageUrl)} className="card-img-top p-3" alt={item.name} style={{ height: '250px', objectFit: 'contain' }} />
+                                                                </Link>
+                                                            </div>
+                                                            <div className="card-body p-2 d-flex flex-column">
+                                                                <small className="text-uppercase text-muted fw-bold mb-1" style={{ fontSize: '0.7rem' }}>{item.brand?.name || "Linh Cosmetics"}</small>
+                                                                <Link to={`/shop-single/${item.id}`} className="text-decoration-none text-dark mb-2">
+                                                                    <h6 className="card-title text-truncate" style={{ fontSize: '0.9rem' }}>{item.name}</h6>
+                                                                </Link>
+                                                                <div className="mt-auto">
+                                                                    <div className="d-flex align-items-baseline">
+                                                                        <span className="fw-bold me-2" style={{ color: '#ff6600' }}>{item.price?.toLocaleString()}đ</span>
+                                                                        {item.originalPrice && <small className="text-muted text-decoration-line-through" style={{ fontSize: '0.75rem' }}>{item.originalPrice.toLocaleString()}đ</small>}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                        <Link to="/shop-single"><img src={item.img} className="card-img-top p-3" alt={item.name} /></Link>
                                                     </div>
-                                                    <div className="card-body p-2">
-                                                        <small className="text-uppercase text-muted fw-bold" style={{ fontSize: '0.7rem' }}>{item.brand}</small>
-                                                        <Link to="/shop-single" className="text-decoration-none text-dark d-block mb-2">
-                                                            <h6 className="card-title text-truncate" style={{ fontSize: '0.9rem' }}>{item.name}</h6>
-                                                        </Link>
-                                                        <div className="d-flex align-items-baseline">
-                                                            <span className="fw-bold me-2" style={{ color: '#ff6600' }}>{item.price}</span>
-                                                            <small className="text-muted text-decoration-line-through" style={{ fontSize: '0.75rem' }}>{item.oldPrice}</small>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                ))}
                                             </div>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div className="carousel-item">
-                                    <div className="row row-cols-2 row-cols-md-5 g-3">
-                                        {[
-                                            { name: "Sữa Rửa Mặt Tạo Bọt Dịu Nhẹ...", brand: "OHUI", price: "600.000đ", oldPrice: "800.000đ", discount: "-25%", img: cat1 },
-                                            { name: "Nước Cân Bằng Da Whoo Radiant...", brand: "WHOO", price: "1.200.000đ", oldPrice: "1.500.000đ", discount: "-20%", img: cat2 },
-                                            { name: "Gel Tẩy Tế Bào Chết Sum37...", brand: "SUM37", price: "900.000đ", oldPrice: "1.200.000đ", discount: "-25%", img: cat3 },
-                                            { name: "Sữa Rửa Mặt Chống Lão Hóa...", brand: "SULWHASOO", price: "850.000đ", oldPrice: "1.100.000đ", discount: "-22%", img: feat1 },
-                                            { name: "Nước Tẩy Trang Mắt Môi...", brand: "WHOO", price: "750.000đ", oldPrice: "950.000đ", discount: "-21%", img: feat2 },
-                                        ].map((item, index) => (
-                                            <div key={index} className="col">
-                                                <div className="card h-100 border-0 shadow-sm">
-                                                    <div className="position-relative">
-                                                        <span className="position-absolute top-0 start-0 badge m-2 rounded-0" style={{ backgroundColor: '#ff6600' }}>{item.discount}</span>
-                                                        <div className="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
-                                                            <button className="btn btn-sm btn-outline-secondary bg-white rounded-circle p-1" style={{ width: '30px', height: '30px' }}><i className="far fa-heart"></i></button>
-                                                            <button className="btn btn-sm btn-outline-secondary bg-white rounded-circle p-1" style={{ width: '30px', height: '30px' }}><i className="fas fa-shopping-bag"></i></button>
-                                                        </div>
-                                                        <Link to="/shop-single"><img src={item.img} className="card-img-top p-3" alt={item.name} /></Link>
-                                                    </div>
-                                                    <div className="card-body p-2">
-                                                        <small className="text-uppercase text-muted fw-bold" style={{ fontSize: '0.7rem' }}>{item.brand}</small>
-                                                        <Link to="/shop-single" className="text-decoration-none text-dark d-block mb-2">
-                                                            <h6 className="card-title text-truncate" style={{ fontSize: '0.9rem' }}>{item.name}</h6>
-                                                        </Link>
-                                                        <div className="d-flex align-items-baseline">
-                                                            <span className="fw-bold me-2" style={{ color: '#ff6600' }}>{item.price}</span>
-                                                            <small className="text-muted text-decoration-line-through" style={{ fontSize: '0.75rem' }}>{item.oldPrice}</small>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
+                                        </div>
+                                    ))
+                                )}
                             </div>
                         </div>
                     </div>
@@ -696,74 +731,61 @@ const Home = () => {
                                 <button type="button" data-bs-target="#carouselTrial" data-bs-slide-to="1"></button>
                             </div>
                             <div className="carousel-inner pb-2">
-                                <div className="carousel-item active">
-                                    <div className="row row-cols-2 row-cols-md-5 g-3">
-                                        {[
-                                            { name: "60 gói Tẩy Da Chết Làm Sáng Da Whoo Brightening Gel 1ml*60", brand: "KHÁC", price: "400.000đ", oldPrice: "1.000.000đ", discount: "-60%", img: feat1 },
-                                            { name: "Bộ Dầu Gội và Dầu Xả Giảm Gàu Và Gãy Rụng Beyond Healing For...", brand: "BEYOND", price: "149.000đ", oldPrice: "300.000đ", discount: "-50%", img: cat1 },
-                                            { name: "Bộ Dưỡng Ẩm Chống Lão Hóa Whoo Vàng Whoo Gongjinhyang...", brand: "WHOO", price: "450.000đ", oldPrice: "1.000.000đ", discount: "-55%", img: feat3 },
-                                            { name: "Bộ Dưỡng Da Ohui Hồng Ohui Miracle Moisture Mini 5pcs", brand: "OHUI", price: "390.000đ", oldPrice: "750.000đ", discount: "-48%", img: cat2 },
-                                            { name: "Bộ Dưỡng Da Tái Sinh Whoo Cheonyuldan Ultimate...", brand: "WHOO", price: "790.000đ", oldPrice: "2.900.000đ", discount: "-73%", img: feat2 },
-                                        ].map((item, index) => (
-                                            <div key={index} className="col">
-                                                <div className="card h-100 border-0 shadow-sm">
-                                                    <div className="position-relative">
-                                                        <span className="position-absolute top-0 start-0 badge m-2 rounded-0" style={{ backgroundColor: '#ff6600' }}>{item.discount}</span>
-                                                        <div className="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
-                                                            <button className="btn btn-sm btn-outline-secondary bg-white rounded-circle p-1" style={{ width: '30px', height: '30px' }}><i className="far fa-heart"></i></button>
-                                                            <button className="btn btn-sm btn-outline-secondary bg-white rounded-circle p-1" style={{ width: '30px', height: '30px' }}><i className="fas fa-shopping-bag"></i></button>
+                                {(sections.trial && sections.trial.length > 0 ? sections.trial : []).reduce((acc, item, index) => {
+                                    const chunkIndex = Math.floor(index / 5);
+                                    if (!acc[chunkIndex]) acc[chunkIndex] = [];
+                                    acc[chunkIndex].push(item);
+                                    return acc;
+                                }, []).length === 0 ? (
+                                    // Empty Logic if needed
+                                    <div className="text-center">Đang cập nhật...</div>
+                                ) : (
+                                    (sections.trial || []).reduce((acc, item, index) => {
+                                        const chunkIndex = Math.floor(index / 5);
+                                        if (!acc[chunkIndex]) acc[chunkIndex] = [];
+                                        acc[chunkIndex].push(item);
+                                        return acc;
+                                    }, []).map((chunk, i) => (
+                                        <div key={i} className={`carousel-item ${i === 0 ? 'active' : ''}`}>
+                                            <div className="row row-cols-2 row-cols-md-5 g-3">
+                                                {chunk.map((item, index) => (
+                                                    <div key={index} className="col">
+                                                        <div className="card h-100 border-0 shadow-sm position-relative">
+                                                            <div className="position-relative">
+                                                                {/* Discount Badge */}
+                                                                {item.originalPrice > item.price && (
+                                                                    <span className="position-absolute top-0 start-0 badge m-2 rounded-0" style={{ backgroundColor: '#ff6600' }}>
+                                                                        -{Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100)}%
+                                                                    </span>
+                                                                )}
+                                                                {/* Icons */}
+                                                                <div className="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
+                                                                    <button className="btn btn-sm btn-outline-secondary bg-white rounded-circle p-1" style={{ width: '30px', height: '30px' }}><i className="far fa-heart"></i></button>
+                                                                    <button className="btn btn-sm btn-outline-secondary bg-white rounded-circle p-1" style={{ width: '30px', height: '30px' }}><i className="fas fa-shopping-bag"></i></button>
+                                                                </div>
+                                                                <Link to={`/shop-single/${item.id}`}>
+                                                                    <img src={resolveImage(item.images?.[0]?.imageUrl)} className="card-img-top p-3" alt={item.name} style={{ height: '250px', objectFit: 'contain' }} />
+                                                                </Link>
+                                                            </div>
+                                                            <div className="card-body p-2 d-flex flex-column">
+                                                                <small className="text-uppercase text-muted fw-bold mb-1" style={{ fontSize: '0.7rem' }}>{item.brand?.name || "Linh Cosmetics"}</small>
+                                                                <Link to={`/shop-single/${item.id}`} className="text-decoration-none text-dark mb-2">
+                                                                    <h6 className="card-title text-truncate" style={{ fontSize: '0.9rem' }}>{item.name}</h6>
+                                                                </Link>
+                                                                <div className="mt-auto">
+                                                                    <div className="d-flex align-items-baseline">
+                                                                        <span className="fw-bold me-2" style={{ color: '#ff6600' }}>{item.price?.toLocaleString()}đ</span>
+                                                                        {item.originalPrice && <small className="text-muted text-decoration-line-through" style={{ fontSize: '0.75rem' }}>{item.originalPrice.toLocaleString()}đ</small>}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                        <Link to="/shop-single"><img src={item.img} className="card-img-top p-3" alt={item.name} /></Link>
                                                     </div>
-                                                    <div className="card-body p-2">
-                                                        <small className="text-uppercase text-muted fw-bold" style={{ fontSize: '0.7rem' }}>{item.brand}</small>
-                                                        <Link to="/shop-single" className="text-decoration-none text-dark d-block mb-2">
-                                                            <h6 className="card-title text-truncate" style={{ fontSize: '0.9rem' }}>{item.name}</h6>
-                                                        </Link>
-                                                        <div className="d-flex align-items-baseline">
-                                                            <span className="fw-bold me-2" style={{ color: '#ff6600' }}>{item.price}</span>
-                                                            <small className="text-muted text-decoration-line-through" style={{ fontSize: '0.75rem' }}>{item.oldPrice}</small>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                ))}
                                             </div>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div className="carousel-item">
-                                    <div className="row row-cols-2 row-cols-md-5 g-3">
-                                        {[
-                                            { name: "Set Mini Dưỡng Trắng...", brand: "OHUI", price: "350.000đ", oldPrice: "600.000đ", discount: "-42%", img: cat3 },
-                                            { name: "Set Mini Cấp Ẩm Sum37...", brand: "SUM37", price: "400.000đ", oldPrice: "700.000đ", discount: "-43%", img: feat1 },
-                                            { name: "Gói Dùng Thử Kem Mắt...", brand: "WHOO", price: "50.000đ", oldPrice: "100.000đ", discount: "-50%", img: cat1 },
-                                            { name: "Gói Dùng Thử Tinh Chất...", brand: "SULWHASOO", price: "60.000đ", oldPrice: "120.000đ", discount: "-50%", img: feat2 },
-                                            { name: "Set Mini Chống Lão Hóa...", brand: "OHUI", price: "500.000đ", oldPrice: "900.000đ", discount: "-44%", img: cat2 },
-                                        ].map((item, index) => (
-                                            <div key={index} className="col">
-                                                <div className="card h-100 border-0 shadow-sm">
-                                                    <div className="position-relative">
-                                                        <span className="position-absolute top-0 start-0 badge m-2 rounded-0" style={{ backgroundColor: '#ff6600' }}>{item.discount}</span>
-                                                        <div className="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
-                                                            <button className="btn btn-sm btn-outline-secondary bg-white rounded-circle p-1" style={{ width: '30px', height: '30px' }}><i className="far fa-heart"></i></button>
-                                                            <button className="btn btn-sm btn-outline-secondary bg-white rounded-circle p-1" style={{ width: '30px', height: '30px' }}><i className="fas fa-shopping-bag"></i></button>
-                                                        </div>
-                                                        <Link to="/shop-single"><img src={item.img} className="card-img-top p-3" alt={item.name} /></Link>
-                                                    </div>
-                                                    <div className="card-body p-2">
-                                                        <small className="text-uppercase text-muted fw-bold" style={{ fontSize: '0.7rem' }}>{item.brand}</small>
-                                                        <Link to="/shop-single" className="text-decoration-none text-dark d-block mb-2">
-                                                            <h6 className="card-title text-truncate" style={{ fontSize: '0.9rem' }}>{item.name}</h6>
-                                                        </Link>
-                                                        <div className="d-flex align-items-baseline">
-                                                            <span className="fw-bold me-2" style={{ color: '#ff6600' }}>{item.price}</span>
-                                                            <small className="text-muted text-decoration-line-through" style={{ fontSize: '0.75rem' }}>{item.oldPrice}</small>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
+                                        </div>
+                                    ))
+                                )}
                             </div>
                         </div>
                     </div>

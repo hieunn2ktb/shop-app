@@ -42,6 +42,8 @@ public class Product {
     private Brand brand;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @lombok.ToString.Exclude
+    @lombok.EqualsAndHashCode.Exclude
     private List<ProductImage> images;
 
     @com.fasterxml.jackson.annotation.JsonIgnore

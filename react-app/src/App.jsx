@@ -21,6 +21,8 @@ import NotFound from './pages/NotFound';
 import AdminLayout from './layouts/AdminLayout';
 import ProductList from './pages/admin/ProductList';
 import ProductForm from './pages/admin/ProductForm';
+import BrandList from './pages/admin/BrandList';
+import BrandForm from './pages/admin/BrandForm';
 
 function App() {
   return (
@@ -30,7 +32,7 @@ function App() {
         <Route path="shop" element={<Shop />} />
         <Route path="about" element={<About />} />
         <Route path="contact" element={<Contact />} />
-        <Route path="shop-single" element={<ShopSingle />} />
+        <Route path="shop-single/:id" element={<ShopSingle />} />
         <Route path="cart" element={<Cart />} />
         <Route path="account" element={<Account />} />
         <Route path="pages/dieu-khoan-dich-vu" element={<TermsOfService />} />
@@ -52,6 +54,10 @@ function App() {
         <Route path="products" element={<ProductList />} />
         <Route path="products/new" element={<ProductForm />} />
         <Route path="products/edit/:id" element={<ProductForm />} />
+
+        <Route path="brands" element={<BrandList />} />
+        <Route path="brands/new" element={<BrandForm />} />
+        <Route path="brands/edit/:id" element={<BrandForm />} />
         {/* Placeholder for other admin pages */}
         <Route path="*" element={<div className="p-4">Page under construction</div>} />
       </Route>

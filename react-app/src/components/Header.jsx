@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getCurrentUser, logout } from '../services/authService';
-
-// Import local logo (assuming it's available or use a placeholder similar to original)
-// Note: User didn't provide logo asset, so styling a text logo or using a placeholder.
-// The screenshot shows a graphical logo. For now, we will use a text or placeholder image but structure effectively.
+import { getCategories, getBrands } from '../services/homeService';
 
 const Header = ({ onOpenCart }) => {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
-
+    const [categories, setCategories] = useState([]);
+    const [brands, setBrands] = useState([]);
     const [cartCount, setCartCount] = useState(0);
 
     useEffect(() => {
@@ -28,6 +26,15 @@ const Header = ({ onOpenCart }) => {
                     console.log("Error loading cart count", error);
                 }
             }
+
+            // Fetch Categories & Brands
+            try {
+                const [cats, brs] = await Promise.all([getCategories(), getBrands()]);
+                setCategories(cats);
+                setBrands(brs);
+            } catch (error) {
+                console.log("Error loading data", error);
+            }
         };
         fetchUserData();
     }, []);
@@ -44,11 +51,9 @@ const Header = ({ onOpenCart }) => {
             {/* Top Bar: Logo, Search, Hotline, User Icons */}
             <div className="container py-3 border-bottom">
                 <div className="row align-items-center">
-                    {/* ... logos and search ... */}
                     {/* Logo (Left) */}
                     <div className="col-lg-2 col-md-3">
                         <Link className="text-decoration-none" to="/">
-                            {/* Simulating the logo from the screenshot */}
                             <h1 className="h1 text-success fw-bold m-0" style={{ fontFamily: 'cursive', color: '#ff3366' }}>Linh Cosmetics</h1>
                         </Link>
                     </div>
@@ -120,52 +125,119 @@ const Header = ({ onOpenCart }) => {
                     {/* Catalog Dropdown Button */}
                     <div className="col-auto p-0">
                         <div className="dropdown">
-                            <button className="btn fw-bold rounded-0 d-flex align-items-center gap-2 py-3 px-4" type="button" style={{ backgroundColor: '#f8f9fa', color: '#333' }}>
+                            <button
+                                className="btn fw-bold rounded-0 d-flex align-items-center gap-2 py-3 px-4 dropdown-toggle"
+                                type="button"
+                                id="categoryDropdown"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                style={{ backgroundColor: '#f8f9fa', color: '#333' }}
+                            >
                                 <i className="fas fa-bars"></i>
                                 DANH MỤC SẢN PHẨM
                             </button>
+                            <ul className="dropdown-menu w-100 rounded-0 border-0 shadow-sm mt-0" aria-labelledby="categoryDropdown">
+                                {categories.length > 0 ? categories.map((cat, index) => (
+                                    <li key={index}>
+                                        <Link
+                                            className="dropdown-item py-2 border-bottom"
+                                            to="/shop"
+                                            state={{ category: cat.name }}
+                                            style={{ fontSize: '0.9rem' }}
+                                        >
+                                            {cat.name}
+                                        </Link>
+                                    </li>
+                                )) : (
+                                    <li><span className="dropdown-item text-muted">Đang tải...</span></li>
+                                )}
+                            </ul>
                         </div>
                     </div>
 
                     {/* Navigation Menu */}
                     <div className="col">
                         <ul className="nav justify-content-start gap-3">
+                            {/* Brand Dropdown */}
+                            <li className="nav-item dropdown">
+                                <a
+                                    className="nav-link text-uppercase fw-bold text-dark app-nav-link dropdown-toggle"
+                                    href="#"
+                                    id="brandDropdown"
+                                    role="button"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false"
+                                    style={{ fontSize: '0.85rem' }}
+                                >
+                                    Thương Hiệu
+                                </a>
+                                <ul className="dropdown-menu shadow-sm border-0" aria-labelledby="brandDropdown">
+                                    {brands.length > 0 ? brands.map((b, idx) => (
+                                        <li key={idx}>
+                                            <Link
+                                                className="dropdown-item"
+                                                to="/shop"
+                                                state={{ brand: b.name }}
+                                            >
+                                                {b.name}
+                                            </Link>
+                                        </li>
+                                    )) : (
+                                        <li><span className="dropdown-item text-muted">Đang tải...</span></li>
+                                    )}
+                                </ul>
+                            </li>
+
+                            {/* Face Care Link */}
                             <li className="nav-item">
-                                <Link className="nav-link text-uppercase fw-bold text-dark app-nav-link" to="/shop" style={{ fontSize: '0.85rem' }}>Thương Hiệu <i className="fas fa-chevron-down small text-muted ms-1"></i></Link>
+                                <Link
+                                    className="nav-link text-uppercase fw-bold text-dark app-nav-link"
+                                    to="/shop"
+                                    state={{ category: 'Chăm Sóc Da Mặt' }}
+                                    style={{ fontSize: '0.85rem' }}
+                                >
+                                    Chăm Sóc Da Mặt
+                                </Link>
+                            </li>
+
+                            {/* Makeup Link */}
+                            <li className="nav-item">
+                                <Link
+                                    className="nav-link text-uppercase fw-bold text-dark app-nav-link"
+                                    to="/shop"
+                                    state={{ category: 'Trang Điểm' }}
+                                    style={{ fontSize: '0.85rem' }}
+                                >
+                                    Trang Điểm
+                                </Link>
+                            </li>
+
+                            <li className="nav-item">
+                                <Link className="nav-link text-uppercase fw-bold text-dark app-nav-link" to="/shop" state={{ category: 'Bộ Sản Phẩm' }} style={{ fontSize: '0.85rem' }}>Bộ Sản Phẩm</Link>
                             </li>
                             <li className="nav-item">
-                                <Link className="nav-link text-uppercase fw-bold text-dark app-nav-link" to="/shop" style={{ fontSize: '0.85rem' }}>Chăm Sóc Da Mặt <i className="fas fa-chevron-down small text-muted ms-1"></i></Link>
+                                <Link className="nav-link text-uppercase fw-bold text-dark app-nav-link" to="/shop" state={{ category: 'Chăm Sóc Cơ Thể' }} style={{ fontSize: '0.85rem' }}>Chăm Sóc Cơ Thể</Link>
                             </li>
                             <li className="nav-item">
-                                <Link className="nav-link text-uppercase fw-bold text-dark app-nav-link" to="/shop" style={{ fontSize: '0.85rem' }}>Trang Điểm <i className="fas fa-chevron-down small text-muted ms-1"></i></Link>
+                                <Link className="nav-link text-uppercase fw-bold text-dark app-nav-link" to="/shop" state={{ category: 'Chăm Sóc Tóc' }} style={{ fontSize: '0.85rem' }}>Chăm Sóc Tóc</Link>
                             </li>
                             <li className="nav-item">
-                                <Link className="nav-link text-uppercase fw-bold text-dark app-nav-link" to="/shop" style={{ fontSize: '0.85rem' }}>Bộ Sản Phẩm</Link>
-                            </li>
-                            <li className="nav-item">
-                                <Link className="nav-link text-uppercase fw-bold text-dark app-nav-link" to="/shop" style={{ fontSize: '0.85rem' }}>Chăm Sóc Cơ Thể</Link>
-                            </li>
-                            <li className="nav-item">
-                                <Link className="nav-link text-uppercase fw-bold text-dark app-nav-link" to="/shop" style={{ fontSize: '0.85rem' }}>Chăm Sóc Tóc</Link>
-                            </li>
-                            <li className="nav-item">
-                                <Link className="nav-link text-uppercase fw-bold text-dark app-nav-link" to="/shop" style={{ fontSize: '0.85rem' }}>Chăm Sóc Da Dành Cho Nam</Link>
+                                <Link className="nav-link text-uppercase fw-bold text-dark app-nav-link" to="/shop" state={{ category: 'Chăm Sóc Da Dành Cho Nam' }} style={{ fontSize: '0.85rem' }}>Chăm Sóc Da Dành Cho Nam</Link>
                             </li>
                         </ul>
                     </div>
                 </div>
             </div>
 
-            {/* Mobile Header (Search input moved here for mobile if needed, or keeping it strictly responsive) */}
+            {/* Mobile Header */}
             <div className="container d-block d-md-none py-2">
                 <div className="input-group">
                     <input type="text" className="form-control" placeholder="Bạn đang tìm gì..." />
                     <button className="btn btn-secondary" type="button"><i className="fa fa-search"></i></button>
                 </div>
             </div>
-
         </header>
-    )
-}
+    );
+};
 
 export default Header;

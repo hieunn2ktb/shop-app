@@ -19,6 +19,9 @@ public class OrderItem {
 
     @ManyToOne
     @JoinColumn(name = "order_id")
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    @lombok.ToString.Exclude
+    @lombok.EqualsAndHashCode.Exclude
     private Order order;
 
     @ManyToOne

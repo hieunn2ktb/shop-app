@@ -19,6 +19,8 @@ public class CartItem {
     @ManyToOne
     @JoinColumn(name = "cart_id")
     @JsonIgnore
+    @lombok.ToString.Exclude
+    @lombok.EqualsAndHashCode.Exclude
     private Cart cart;
 
     @ManyToOne

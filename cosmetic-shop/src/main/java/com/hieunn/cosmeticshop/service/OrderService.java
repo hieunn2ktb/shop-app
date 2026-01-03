@@ -22,6 +22,7 @@ public class OrderService {
     private final CartService cartService;
     private final CartRepository cartRepository;
     private final UserRepository userRepository;
+    private final com.hieunn.cosmeticshop.repository.ProductRepository productRepository;
 
     @Transactional
     public Order checkout(String username, CheckoutRequest request) {
@@ -34,30 +35,27 @@ public class OrderService {
             throw new RuntimeException("Cart is empty");
         }
 
-        // 2. Create Order
-        Order order = new Order();
-        order.setUser(user);
-        order.setOrderDate(LocalDateTime.now());
-        order.setStatus("PENDING");
-        order.setReceiverName(request.getReceiverName());
-        order.setPhoneNumber(request.getPhoneNumber());
-        order.setShippingAddress(request.getShippingAddress());
-        order.setPaymentMethod(request.getPaymentMethod());
-
-        // 3. Create OrderItems from CartItems and Calculate Total
-        List<OrderItem> orderItems = new ArrayList<>();
+        // 2. Validate Stock and Calculate Total
         BigDecimal totalAmount = BigDecimal.ZERO;
+        List<OrderItem> orderItems = new ArrayList<>();
+        Order order = new Order(); // Create order object first to link items
 
         for (CartItem cartItem : cart.getItems()) {
+            Product product = cartItem.getProduct();
+            if (product.getQuantity() < cartItem.getQuantity()) {
+                throw new RuntimeException("Insufficient stock for product: " + product.getName());
+            }
+
+            // Decrease stock
+            product.setQuantity(product.getQuantity() - cartItem.getQuantity());
+            productRepository.save(product);
+
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(order);
-            orderItem.setProduct(cartItem.getProduct());
+            orderItem.setProduct(product);
             orderItem.setQuantity(cartItem.getQuantity());
 
-            // Assuming Product has a price field of type Double or BigDecimal.
-            // Based on previous files, ProductDTO used Double price.
-            // converting.
-            BigDecimal price = cartItem.getProduct().getPrice();
+            BigDecimal price = product.getPrice();
             orderItem.setPrice(price);
 
             BigDecimal lineTotal = price.multiply(BigDecimal.valueOf(cartItem.getQuantity()));
@@ -66,6 +64,14 @@ public class OrderService {
             orderItems.add(orderItem);
         }
 
+        // 3. Create Order
+        order.setUser(user);
+        order.setOrderDate(LocalDateTime.now());
+        order.setStatus("PENDING");
+        order.setReceiverName(request.getReceiverName());
+        order.setPhoneNumber(request.getPhoneNumber());
+        order.setShippingAddress(request.getShippingAddress());
+        order.setPaymentMethod(request.getPaymentMethod());
         order.setOrderItems(orderItems);
         order.setTotalAmount(totalAmount);
 

@@ -35,4 +35,12 @@ public class CartController {
             @PathVariable Long itemId) {
         return ResponseEntity.ok(cartService.removeFromCart(userDetails.getUsername(), itemId));
     }
+
+    @PutMapping("/{itemId}")
+    public ResponseEntity<Cart> updateCartItem(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long itemId,
+            @RequestParam int quantity) {
+        return ResponseEntity.ok(cartService.updateCartItemQuantity(userDetails.getUsername(), itemId, quantity));
+    }
 }

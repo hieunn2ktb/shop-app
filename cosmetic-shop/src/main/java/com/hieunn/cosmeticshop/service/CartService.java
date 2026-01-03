@@ -69,4 +69,19 @@ public class CartService {
         cart.getItems().clear();
         cartRepository.save(cart);
     }
+
+    @Transactional
+    public Cart updateCartItemQuantity(String username, Long cartItemId, int quantity) {
+        Cart cart = getCart(username);
+        Optional<CartItem> itemOpt = cart.getItems().stream()
+                .filter(item -> item.getId().equals(cartItemId))
+                .findFirst();
+
+        if (itemOpt.isPresent()) {
+            CartItem item = itemOpt.get();
+            item.setQuantity(quantity);
+            cartRepository.save(cart);
+        }
+        return cart;
+    }
 }

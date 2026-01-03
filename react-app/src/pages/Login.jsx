@@ -31,8 +31,7 @@ const Login = () => {
                 window.location.reload(); // To update header state
             }
         } catch (err) {
-            setError('Tên đăng nhập hoặc mật khẩu không đúng!');
-            console.error(err);
+            setError(err.message || 'Có lỗi xảy ra, vui lòng thử lại!');
         }
     };
 
